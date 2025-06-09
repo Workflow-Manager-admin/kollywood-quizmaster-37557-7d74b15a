@@ -23,14 +23,13 @@ function CharacterMovieMatch({
   onGameEnd,
   onBack,
 }) {
-  // Game constants
+  // Number of rounds and options per round
   const TOTAL_ROUNDS = 10;
   const OPTIONS_PER_ROUND = 4;
-  // Character/Director for the round
+  // The "character" for the quiz (hardcoded as Vetrimaaran dir.)
   const CHARACTER = "Vetrimaaran";
 
-  // Hardcoded list of Vetrimaaran movies with posters (as clues)
-  // Note: Must be at least 10 for 10 rounds
+  // Hardcoded list of 10 clue movies for the CHARACTER
   const CHARACTER_MOVIES = [
     {
       title: "Visaranai",
@@ -84,18 +83,18 @@ function CharacterMovieMatch({
     }
   ].filter(m => !!m.poster_path);
 
-  // State
+  // State for the rounds, current progress, answers
   const [quizRounds, setQuizRounds] = useState([]);
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [userGuesses, setUserGuesses] = useState([]); // each: {guessIdx, correctIdx, correct, chosenTitle, correctTitle}
-  const [droppedIdx, setDroppedIdx] = useState(null); // user's drop this round
-  const [showFeedback, setShowFeedback] = useState(false); // animate feedback overlay
+  const [currentIdx, setCurrentIdx] = useState(0); // round counter
+  const [userGuesses, setUserGuesses] = useState([]);
+  const [droppedIdx, setDroppedIdx] = useState(null);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const clueRef = useRef(null);
 
-  // Helper: Shuffle array (pure, not mutating passed-in)
+  // Helper: shuffle (Fisher-Yates)
   function shuffle(array) {
     const arr = array.slice();
     for (let i = arr.length - 1; i > 0; i--) {
@@ -105,8 +104,7 @@ function CharacterMovieMatch({
     return arr;
   }
 
-  // On mount/setup: build quizRounds: 
-  // (1 unique character-movie per round, 3 decoys per round, posters never reused, movies never repeated)
+  // On mount: build quiz rounds (guaranteed non-repeating 10 clue movies, 4 options, 3 decoys per round)
   useEffect(() => {
     if (!sessionInitialized) {
       initializeSession();
@@ -114,11 +112,9 @@ function CharacterMovieMatch({
       return;
     }
     if (sessionInitialized && quizRounds.length === 0) {
-      // Claim a decoy pool big enough for all decoy needs
-      // At most 10 rounds × 3 decoys = 30, but we claim more to reject movies with invalid images, etc.
+      // Pull a pool of decoy options from context (no clue movie or poster repeat)
       let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * 10) || [];
       if (!Array.isArray(decoyPool)) decoyPool = [];
-      // Remove any with missing posters or sharing poster with any clue (no repeats)
       const characterIds = new Set(CHARACTER_MOVIES.map(m => String(m.tmdb_id)));
       decoyPool = decoyPool.filter(
         m =>
@@ -126,22 +122,21 @@ function CharacterMovieMatch({
           !characterIds.has(String(m.id)) &&
           m.title
       );
-      // Shuffle to randomize order
       decoyPool = shuffle(decoyPool);
 
+      // Prepare 10 clue movies, shuffle for each game
       const availableClues = shuffle(CHARACTER_MOVIES).slice(0, TOTAL_ROUNDS);
       const usedPosters = new Set();
       const usedMovieIds = new Set();
 
-      // Compose quizRounds
+      // Build each round: 1 unique clue, 3 unique decoys, never repeated in quiz
       const rounds = [];
       for (let i = 0; i < availableClues.length; ++i) {
         const clueMovie = availableClues[i];
         usedPosters.add(clueMovie.poster_path);
         usedMovieIds.add(clueMovie.tmdb_id);
 
-        // Only allow decoys that have not been used as options for any prior round
-        // and do not share poster with any clue or earlier option.
+        // Choose 3 unique decoys which haven't been shown as options anywhere before
         const validDecoys = decoyPool.filter(
           m =>
             !usedPosters.has(m.poster_path) &&
@@ -153,7 +148,7 @@ function CharacterMovieMatch({
           usedMovieIds.add(d.id);
         });
 
-        // Insert correct answer at random position
+        // Randomize position of the right answer
         const insertAt = Math.floor(Math.random() * OPTIONS_PER_ROUND);
         const options = chosenDecoys.slice();
         options.splice(insertAt, 0, {
@@ -168,7 +163,6 @@ function CharacterMovieMatch({
           correctIdx: insertAt
         });
       }
-
       setQuizRounds(rounds);
       setCurrentIdx(0);
       setUserGuesses([]);
