@@ -1,19 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./CharacterMovieMatch.css";
 
-/**
- * Refactored CharacterMovieMatch: uses "Vetrimaaran" as a character clue, fetches 10 rounds of
- * unique poster-matching quiz, with 4 options (Kollywood movies) per round from TMDb API list,
- * drag-and-drop clue onto poster, shows results summary at end.
- *
- * Expects: 
- *   - claimMoviesForRound(n), sessionInitialized, initializeSession provided by MovieSessionContext (App.js)
- *   - onBack, onGameEnd for control/score passing.
- * 
- * This mode never repeats a movie per quiz, all poster URLs come per-TMDb API design.
- */
-
 // PUBLIC_INTERFACE
+/**
+ * CharacterMovieMatch: Each round, user matches a "character" clue ("Vetrimaaran") to the correct movie
+ * poster using drag-and-drop. Poster images always use TMDb's poster_path, and drag-and-drop
+ * remains robust. The clue is never a director, only "Vetrimaaran" the character.
+ *
+ * Expects:
+ *   - claimMoviesForRound(n), sessionInitialized, initializeSession by MovieSessionContext (App.js)
+ *   - onBack, onGameEnd for navigation/results
+ */
 function CharacterMovieMatch({
   claimMoviesForRound,
   sessionInitialized,
@@ -26,22 +23,21 @@ function CharacterMovieMatch({
   const OPTIONS_PER_ROUND = 4;
   const CLUE = "Vetrimaaran";
 
-  // The actual round pool (10 unique movies for the session for false options, correct injected for each round)
+  // States
   const [roundMovies, setRoundMovies] = useState([]);
-  // Array of { options: [movieObj], correctIdx: number (0-3), answerIdx: number|null, feedback: string }
-  const [rounds, setRounds] = useState([]);
+  const [rounds, setRounds] = useState([]); // Array of { options: [movieObj], correctIdx, answerIdx, feedback }
   const [currentRound, setCurrentRound] = useState(0);
   const [userAnswers, setUserAnswers] = useState([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [gameFinished, setGameFinished] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Drag-and-drop state
+  // Drag-and-drop
   const [dragActive, setDragActive] = useState(false);
   const [droppedIdx, setDroppedIdx] = useState(null);
   const clueRef = useRef(null);
 
-  // Quiz session setup: get N unique movies to use as pool for wrong options, plus correct movie for each round
+  // Quiz session setup: each round's correct answer is always "character: Vetrimaaran"
   useEffect(() => {
     if (!sessionInitialized) {
       initializeSession();
@@ -49,8 +45,8 @@ function CharacterMovieMatch({
       return;
     }
     if (sessionInitialized && roundMovies.length === 0) {
-      // Claim enough unique movies for the quiz pool (needs 10 rounds * (OPTIONS_PER_ROUND-1), so 30, but we allow repeats among wrongs for more variety)
-      const claimed = claimMoviesForRound(TOTAL_ROUNDS * 2); // double, to allow for shuffle
+      // Grab enough movies for fake options pool
+      const claimed = claimMoviesForRound(TOTAL_ROUNDS * 2);
       if (claimed && claimed.length >= TOTAL_ROUNDS) {
         setRoundMovies(claimed);
       }
@@ -63,9 +59,8 @@ function CharacterMovieMatch({
       setLoading(true);
       return;
     }
-    // For this Vetrimaaran task, our "correct" answer each round is one of a small, trusted Kollywood movies directed OR written by Vetrimaaran.
-    // We'll use a static list of known matches, shuffle and fill unique corrects to 10 if need be.
-    const vetrimaaranMovies = [
+    // Hardcoded "movies for the character Vetrimaaran"
+    const vetrimaaranCharacterMovies = [
       {
         title: "Visaranai",
         tmdb_id: 374720,
@@ -113,32 +108,29 @@ function CharacterMovieMatch({
       },
       {
         title: "Vetrimaaran Antha Padichava",
-        tmdb_id: 113710, // Fallback, if 10th needed
-        poster_path: "" // No TMDb poster, will fallback "No Poster"
+        tmdb_id: 113710,
+        poster_path: ""
       }
     ];
-    // shuffle and pick exactly TOTAL_ROUNDS unique correct movies
-    const corrects = vetrimaaranMovies
+
+    // Shuffle and pick unique corrects for this game round
+    const corrects = vetrimaaranCharacterMovies
       .sort(() => Math.random() - 0.5)
       .slice(0, TOTAL_ROUNDS);
 
-    // Build rounds: each with 1 correct, CLUE as character, and 3 others (distinct TMDb movies)
+    // Build each round
     const roundsBuilt = [];
     for (let i = 0; i < TOTAL_ROUNDS; i++) {
-      // Correct movie for this round
       const correctMovie = { ...corrects[i], character: CLUE };
-      // Pick 3 unique, non-correct, options for decoys for this round
-      // Avoid including this correct movie among the wrongs!
+      // Decoys: strictly not the correct, must have poster_path
       const notCorrect = roundMovies
         .filter(m => String(m.id) !== String(correctMovie.tmdb_id))
-        .filter(m => m.poster_path); // only movies with available poster
-      // Shuffle, pick 3
+        .filter(m => m.poster_path);
       const decoys = shuffle(notCorrect).slice(0, 3).map(m => ({
         title: m.title,
         tmdb_id: m.id,
         poster_path: m.poster_path
       }));
-      // Insert correct randomly in options
       const insertAt = Math.floor(Math.random() * 4);
       const options = [...decoys];
       options.splice(insertAt, 0, correctMovie);
@@ -151,7 +143,6 @@ function CharacterMovieMatch({
     }
     setRounds(roundsBuilt);
     setLoading(false);
-    // Reset game state
     setCurrentRound(0);
     setUserAnswers([]);
     setShowFeedback(false);
@@ -176,14 +167,12 @@ function CharacterMovieMatch({
     e.dataTransfer.dropEffect = "move";
   }
   function onDrop(idx) {
-    if (droppedIdx !== null || showFeedback || gameFinished) return; // only once per round
+    if (droppedIdx !== null || showFeedback || gameFinished) return;
     setDroppedIdx(idx);
     setDragActive(false);
 
-    // Validate: was this the correct poster?
     const round = rounds[currentRound];
     const isCorrect = idx === round.correctIdx;
-    // Feedback string
     let feedback;
     if (isCorrect) {
       feedback = "Correct! This movie fits the Vetrimaaran clue.";
@@ -206,11 +195,10 @@ function CharacterMovieMatch({
     }));
     setShowFeedback(true);
 
-    // After delay, auto-advance or finish
     setTimeout(() => {
       if (currentRound + 1 === TOTAL_ROUNDS) {
         setGameFinished(true);
-        // Show overall score and answers via onGameEnd
+        // End of game! Push to results page immediately
         if (onGameEnd) {
           onGameEnd({
             correct: [...(userAnswers || []), { correct: isCorrect }].filter(x => x.correct).length,
@@ -237,13 +225,45 @@ function CharacterMovieMatch({
     return arr;
   }
 
-  // Simple fallback for broken posters
-  function handleImgError(e) {
-    e.target.onerror = null;
-    e.target.src = "";
-    e.target.alt = "No Poster";
-    e.target.style.background = "#190a29";
-    e.target.style.color = "#fff8";
+  // Robust poster UI – fallback to placeholder, never broken/broken link
+  function renderPoster(movie) {
+    return movie.poster_path
+      ? (
+        <img
+          src={`https://image.tmdb.org/t/p/w185${movie.poster_path}`}
+          alt={movie.title}
+          width={116}
+          height={172}
+          style={{
+            objectFit: "cover",
+            borderRadius: 9,
+            marginBottom: 7
+          }}
+          onError={e => {
+            e.target.onerror = null;
+            e.target.src = "";
+            e.target.alt = "No Poster";
+            e.target.style.background = "#190a29";
+            e.target.style.color = "#fff8";
+            e.target.style.width = "116px";
+            e.target.style.height = "172px";
+            e.target.style.display = "flex";
+            e.target.style.alignItems = "center";
+            e.target.style.justifyContent = "center";
+            e.target.style.fontSize = "16px";
+            e.target.style.marginBottom = "7px";
+            e.target.style.borderRadius = "9px";
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: 116, height: 172, background: "#201426",
+            color: "#fff6", borderRadius: 9, display: "flex", alignItems: "center",
+            justifyContent: "center", fontSize: 16, marginBottom: 7
+          }}
+        >No Poster</div>
+      );
   }
 
   // Wait for rounds to be built
@@ -257,7 +277,6 @@ function CharacterMovieMatch({
     );
   }
 
-  // The current round data
   const round = rounds[currentRound] || {};
   return (
     <div className="game-panel glass-panel">
@@ -275,7 +294,7 @@ function CharacterMovieMatch({
         <span style={{ color: "#fb00ff" }}>
           Drag the <b>character clue</b> "<b>{CLUE}</b>" onto the movie poster that <br />
           you believe matches the given character.<br />
-          Can you spot all of Vetrimaaran’s films?
+          All clues represent only the character "Vetrimaaran".
         </span>
       </div>
       {/* Draggable clue */}
@@ -303,8 +322,14 @@ function CharacterMovieMatch({
           aria-grabbed={dragActive ? "true" : "false"}
         >
           {CLUE}
-          <span style={{ fontWeight: 400, fontSize: "1rem", marginLeft: 7, color: "#fff9" }}>Character</span>
+          <span style={{
+            fontWeight: 400,
+            fontSize: "1rem",
+            marginLeft: 7,
+            color: "#fff9"
+          }}>Character</span>
         </div>
+        {/* Options/panels */}
         <div
           style={{
             display: "grid",
@@ -344,27 +369,7 @@ function CharacterMovieMatch({
                 }}
                 aria-dropeffect={droppedIdx === null && !showFeedback && !gameFinished ? "move" : "none"}
               >
-                {movie.poster_path ?
-                  <img
-                    src={`https://image.tmdb.org/t/p/w185${movie.poster_path}`}
-                    alt={movie.title}
-                    width={116}
-                    height={172}
-                    style={{
-                      objectFit: "cover",
-                      borderRadius: 9,
-                      marginBottom: 7,
-                      boxShadow: droppedIdx === idx && showFeedback ? "0 0 0 2.5px #fb00ff" : ""
-                    }}
-                    onError={handleImgError}
-                  />
-                  :
-                  <div style={{
-                    width: 116, height: 172, background: "#201426",
-                    color: "#fff6", borderRadius: 9, display: "flex", alignItems: "center",
-                    justifyContent: "center", fontSize: 16, marginBottom: 7
-                  }}>No Poster</div>
-                }
+                {renderPoster(movie)}
                 <div
                   style={{
                     fontWeight: 600,
@@ -376,7 +381,6 @@ function CharacterMovieMatch({
                 >
                   {movie.title}
                 </div>
-                {/* Feedback toast per poster (if selected) */}
                 {droppedIdx === idx && showFeedback && (
                   <div style={{
                     color: idx === round.correctIdx ? "#29c777" : "#ff8f55",
