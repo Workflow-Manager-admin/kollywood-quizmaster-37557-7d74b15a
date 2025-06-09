@@ -199,11 +199,42 @@ function CharacterMovieMatch({
   }
 
   // Poster rendering: always show image or fallback
+  // PUBLIC_INTERFACE
+  /**
+   * Renders a movie poster if data is valid; shows fallback for undefined/null/invalid.
+   * @param {object} movie - movie object (must have poster_path for image)
+   * @returns JSX element
+   */
   function renderPoster(movie) {
-    return movie.poster_path ? (
+    if (
+      !movie ||
+      typeof movie !== "object" ||
+      !movie.poster_path ||
+      typeof movie.poster_path !== "string"
+    ) {
+      return (
+        <div
+          style={{
+            width: 116,
+            height: 172,
+            background: "#201426",
+            color: "#fff6",
+            borderRadius: 9,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 16,
+            marginBottom: 7
+          }}
+        >
+          No Poster
+        </div>
+      );
+    }
+    return (
       <img
         src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
-        alt={movie.title}
+        alt={movie.title ?? "Movie Poster"}
         width={116}
         height={172}
         style={{
@@ -227,23 +258,6 @@ function CharacterMovieMatch({
           e.target.style.borderRadius = "9px";
         }}
       />
-    ) : (
-      <div
-        style={{
-          width: 116,
-          height: 172,
-          background: "#201426",
-          color: "#fff6",
-          borderRadius: 9,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 16,
-          marginBottom: 7,
-        }}
-      >
-        No Poster
-      </div>
     );
   }
 
@@ -267,7 +281,33 @@ function CharacterMovieMatch({
   }
 
   // UI for current round
-  const round = quizRounds[currentIdx];
+  const round =
+    Array.isArray(quizRounds) &&
+    typeof currentIdx === "number" &&
+    currentIdx >= 0 &&
+    currentIdx < quizRounds.length &&
+    quizRounds[currentIdx]
+      ? quizRounds[currentIdx]
+      : null;
+
+  // If round object or its expected properties are missing/null, show loader/fallback.
+  if (
+    !round ||
+    typeof round !== "object" ||
+    !Array.isArray(round.options) ||
+    round.options.length === 0 ||
+    typeof round.clueCharacter !== "string"
+  ) {
+    return (
+      <div className="game-panel glass-panel">
+        <button className="btn btn-back" onClick={onBack}>
+          ← Back
+        </button>
+        <h2>🎬 Character-Movie Match</h2>
+        <em>Preparing your character-movie match round...</em>
+      </div>
+    );
+  }
   return (
     <div className="game-panel glass-panel">
       <button className="btn btn-back" onClick={onBack}>
@@ -279,7 +319,7 @@ function CharacterMovieMatch({
           fontSize: "1rem",
           fontWeight: 400,
           marginLeft: 8,
-        }}>(Q{currentIdx + 1}/{quizRounds.length})</span>
+        }}>(Q{typeof currentIdx === "number" ? currentIdx + 1 : "?"}/{quizRounds.length})</span>
       </h2>
       <div style={{ marginTop: 10, marginBottom: 14 }}>
         <b>How to Play:</b>
@@ -314,7 +354,7 @@ function CharacterMovieMatch({
           tabIndex={0}
           aria-grabbed={dragActive ? "true" : "false"}
         >
-          <span role="img" aria-label="character">👤</span> {round.clueCharacter}
+          <span role="img" aria-label="character">👤</span> {typeof round.clueCharacter === "string" ? round.clueCharacter : "?"}
           <span style={{
             fontWeight: 400,
             fontSize: "1rem",
@@ -332,8 +372,14 @@ function CharacterMovieMatch({
             alignItems: "center"
           }}
         >
-          {Array.isArray(round.options) &&
-            round.options.map((movie, idx) => (
+          {round.options.map((movie, idx) => {
+            // Use robust guards for all movie accesses.
+            const hasValidMovie =
+              !!movie &&
+              typeof movie === "object" &&
+              (typeof movie.poster_path === "string" || "poster_path" in movie);
+
+            return (
               <div
                 key={`${movie && (movie.tmdb_id ?? idx)}`}
                 onDragOver={droppedIdx === null && !showFeedback ? onDragOver : undefined}
@@ -371,25 +417,27 @@ function CharacterMovieMatch({
                 }}
                 aria-dropeffect={droppedIdx === null && !showFeedback ? "move" : "none"}
               >
-                {/* Guard all movie property access */}
-                {movie ? renderPoster(movie) : (
-                  <div
-                    style={{
-                      width: 116,
-                      height: 172,
-                      background: "#201426",
-                      color: "#fff6",
-                      borderRadius: 9,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 16,
-                      marginBottom: 7
-                    }}
-                  >
-                    No Poster
-                  </div>
-                )}
+                {/* Use guard clause to only pass valid movies to renderPoster */}
+                {hasValidMovie
+                  ? renderPoster(movie)
+                  : (
+                    <div
+                      style={{
+                        width: 116,
+                        height: 172,
+                        background: "#201426",
+                        color: "#fff6",
+                        borderRadius: 9,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 16,
+                        marginBottom: 7
+                      }}
+                    >
+                      No Poster
+                    </div>
+                  )}
                 <div
                   style={{
                     fontWeight: 600,
@@ -399,7 +447,9 @@ function CharacterMovieMatch({
                     textAlign: "center"
                   }}
                 >
-                  {movie && movie.title ? movie.title : <span style={{ color: "#fff4" }}>?</span>}
+                  {movie && typeof movie.title === "string" && movie.title.trim()
+                    ? movie.title
+                    : <span style={{ color: "#fff4" }}>?</span>}
                 </div>
                 {droppedIdx === idx && showFeedback && (
                   <div
@@ -417,13 +467,12 @@ function CharacterMovieMatch({
                   >
                     {idx === round.correctIdx
                       ? "Correct! This character is from the chosen movie."
-                      : `"${
-                          (movie && movie.title) ? movie.title : "Movie"
-                        }" does NOT feature this character.`}
+                      : `"${(movie && typeof movie.title === "string" && movie.title.trim()) ? movie.title : "Movie"}" does NOT feature this character.`}
                   </div>
                 )}
               </div>
-            ))}
+            );
+          })}
         </div>
         {/* FEEDBACK Section */}
         <div style={{ marginTop: 16, minHeight: 28, textAlign: "center" }}>
@@ -438,7 +487,11 @@ function CharacterMovieMatch({
               {droppedIdx === round.correctIdx
                 ? "Correct! Advancing to next..."
                 : `Oops! "${
-                    (round.options && round.options[droppedIdx] && round.options[droppedIdx].title)
+                    Array.isArray(round.options) &&
+                    typeof droppedIdx === "number" &&
+                    round.options[droppedIdx] &&
+                    typeof round.options[droppedIdx].title === "string" &&
+                    round.options[droppedIdx].title.trim()
                       ? round.options[droppedIdx].title
                       : "Movie"
                   }" isn't correct.`}
