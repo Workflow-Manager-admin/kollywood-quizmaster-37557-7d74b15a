@@ -12,6 +12,7 @@ import MovieTimeline from './components/MovieTimeline';
 import SpinTheWheel from './components/SpinTheWheel';
 import CastCombo from './components/CastCombo';
 import ResultsDisplay from './components/ResultsDisplay';
+import { MovieSessionProvider, useMovieSession } from './MovieSessionContext';
 
 // List of game routes and their matching components
 const GAME_MODES = [
@@ -22,6 +23,61 @@ const GAME_MODES = [
   { key: 'spin-the-wheel', name: 'Spin the Wheel', component: SpinTheWheel },
   { key: 'cast-combo', name: 'Cast Combo', component: CastCombo },
 ];
+
+function GameRouter({ activeGame, user, onGameEnd, onBack, results }) {
+  // We are inside MovieSessionProvider here and can useMovieSession if needed
+  // To allow stubs to continue, we still pass loading and movies for now
+
+  const { sessionInitialized, initializeSession, resetSession, claimMoviesForRound, claimNextMovie, wasMovieClaimed, remainingCount, claimedIds } =
+    useMovieSession();
+
+  // Map mode key to component
+  if (results) {
+    return (
+      <div className="fade-in-panel">
+        <ResultsDisplay results={results} onHome={resetSession} />
+      </div>
+    );
+  }
+
+  if (activeGame) {
+    const gameDef = GAME_MODES.find(mode => mode.key === activeGame);
+    const GameComponent = gameDef?.component;
+    if (!GameComponent) {
+      return <div className="panel error">Game mode not found.</div>;
+    }
+    // Instead of passing movies, pass claim helpers or null as fallback for stubs
+    return (
+      <div className="fade-in-panel">
+        <GameComponent
+          loading={false} // stub: movie loading should be handled prior
+          user={user}
+          onGameEnd={onGameEnd}
+          onBack={onBack}
+          // Below: context functions for each mode (to be used in real game logic)
+          claimMoviesForRound={claimMoviesForRound}
+          claimNextMovie={claimNextMovie}
+          sessionInitialized={sessionInitialized}
+          initializeSession={initializeSession}
+          wasMovieClaimed={wasMovieClaimed}
+          remainingCount={remainingCount}
+          claimedIds={claimedIds}
+        />
+      </div>
+    );
+  }
+  // Home screen stub: movie count is derived from session context
+  return (
+    <div className="fade-in-panel">
+      <Home
+        movies={[]} // real games should use the context
+        loading={false}
+        onSelectGame={onBack}
+        username={user?.username}
+      />
+    </div>
+  );
+}
 
 function App() {
   // Login state (null = not logged in)
@@ -66,48 +122,30 @@ function App() {
 
   // Decide which page/component to show based on login & mode
   let content;
+
   if (!user) {
     content = (
       <div className="centered-content">
         <Login onSuccess={setUser} />
       </div>
     );
-  } else if (results) {
-    content = (
-      <div className="fade-in-panel">
-        <ResultsDisplay results={results} onHome={() => setResults(null)} />
-      </div>
-    );
-  } else if (activeGame) {
-    // Find the component for the selected game mode
-    const gameDef = GAME_MODES.find(mode => mode.key === activeGame);
-    const GameComponent = gameDef?.component;
-    if (!GameComponent) {
-      content = <div className="panel error">Game mode not found.</div>;
-    } else {
-      content = (
-        <div className="fade-in-panel">
-          <GameComponent
-            movies={kollywoodMovies}
-            loading={loadingMovies}
-            user={user}
-            onGameEnd={handleGameEnd}
-            onBack={() => setActiveGame(null)}
-          />
-        </div>
-      );
-    }
+  } else if (loadingMovies) {
+    // Only show loading spinner (not games) while fetching movies on first login
+    content = <div className="centered-content"><em>Loading movie data...</em></div>;
   } else {
-    // Home: show all game cards
+    // Wrapping everything post-login in MovieSessionProvider using loaded movie pool
     content = (
-      <div className="fade-in-panel">
-        <Home
-          movies={kollywoodMovies}
-          loading={loadingMovies}
-          onSelectGame={handleSelectGame}
-          username={user?.username}
+      <MovieSessionProvider movies={kollywoodMovies}>
+        <GameRouter
+          activeGame={activeGame}
+          user={user}
+          onGameEnd={handleGameEnd}
+          onBack={() => setActiveGame(null)}
+          results={results}
         />
-      </div>
+        {/* Home uses onBack as goto-home, results uses resetSession when leaving results in GameRouter */}
+        {/* Note: For game start, GameRouter will handle session resume/init logic */}
+      </MovieSessionProvider>
     );
   }
 
