@@ -1,0 +1,57 @@
+.kollywood-navbar {
+  background: var(--navbar-bg, #150937f0);
+  box-shadow: 0 1px 12px 0 rgba(251,0,255,0.09);
+  border-bottom: 1.5px solid var(--border-color);
+  z-index: 104;
+  position: sticky;
+  top: 0;
+}
+
+.navbar-content {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 7vw;
+}
+
+.navbar-logo {
+  font-size: 1.27rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  letter-spacing: 0.02em;
+}
+
+.logo-symbol {
+  font-size: 1.45em;
+  color: var(--secondary);
+  margin-right: 2px;
+}
+
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 2vw;
+}
+
+.navbar-user {
+  font-weight: 500;
+  color: var(--accent);
+  margin-right: 1.2em;
+  letter-spacing: 0.01em;
+}
+
+.btn.btn-outline {
+  background: transparent;
+  color: var(--secondary);
+  border: 1.5px solid var(--secondary);
+  border-radius: 4px;
+  padding: 8px 24px;
+  transition: background .18s, color .18s, border .18s;
+}
+.btn.btn-outline:hover {
+  background: var(--secondary);
+  color: var(--primary);
+}

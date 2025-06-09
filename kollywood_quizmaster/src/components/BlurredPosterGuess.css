@@ -1,0 +1,24 @@
+.game-panel {
+  margin: 72px auto auto auto;
+  max-width: 510px;
+  width: 92vw;
+  padding: 38px 32px 26px 32px;
+  background: var(--panel-bg, #1a0037fd);
+  border-radius: 22px;
+  box-shadow: var(--card-shadow);
+  border: 2px solid var(--border-color, #fb00ff99);
+  min-height: 39vh;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+  align-items: center;
+}
+.btn.btn-back {
+  align-self: flex-start;
+  margin-bottom: 8px;
+  color: var(--secondary);
+  background: none;
+  border: none;
+  font-size: 1.15rem;
+}

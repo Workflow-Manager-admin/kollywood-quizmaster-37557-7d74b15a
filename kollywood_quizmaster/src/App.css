@@ -1,15 +1,24 @@
 :root {
-  --base-light: #00ffff;
-  --base-dark: #00008b;
+  --primary: #121212;
+  --secondary: #fb00ff;
+  --accent: #ffffff;
+  --card-bg: rgba(30,17,41,0.95);
+  --card-glow: #fb00ff88;
+  --navbar-bg: rgba(12, 9, 24, 0.95);
+  --backdrop-glass: rgba(0, 0, 0, 0.4);
   --text-color: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(251,0,255,.3);
+  --game-tile-hover: #fb00ff33;
+  --card-shadow: 0 1px 24px 0 rgba(251, 0, 255, 0.17);
+  --btn-glow: 0 0 8px 1px #fb00ff88;
+  --panel-bg: rgba(18, 18, 18, 0.96);
 }
 
 body {
   margin: 0;
   font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  background-color: var(--base-dark);
+  background: var(--primary);
   color: var(--text-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -17,8 +26,42 @@ body {
 
 .app {
   min-height: 100vh;
+  min-width: 100vw;
   display: flex;
   flex-direction: column;
+  background: none;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* main content wrapper: non-navbar area */
+.main-content {
+  margin-top: 70px;
+  min-height: 70vh;
+}
+
+/* Glass panel effect for core screens */
+.glass-panel {
+  background: var(--panel-bg, #1a0037eb);
+  border-radius: 16px;
+  box-shadow: var(--card-shadow, 0 2px 20px 0 #fb00ff19);
+  border: 1.8px solid var(--border-color, #fb00ff44);
+  backdrop-filter: blur(6px) saturate(1.22);
+}
+
+.centered-content {
+  min-height: calc(100vh - 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fade-in-panel {
+  animation: fadeInMain .53s cubic-bezier(0.33,0.86,0.41,1.1);
+}
+@keyframes fadeInMain {
+  0% { opacity: 0; transform: translateY(40px);}
+  100% { opacity: 1; transform: none; }
 }
 
 .navbar {

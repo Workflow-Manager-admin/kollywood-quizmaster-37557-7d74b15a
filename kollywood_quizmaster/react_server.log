@@ -2,9 +2,9 @@
 > react-kavia@0.1.0 start
 > react-scripts start
 
-(node:953) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:8491) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:953) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:8491) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 Starting the development server...
 
 Compiled successfully!
@@ -19,17 +19,611 @@ To create a production build, use npm run build.
 
 webpack compiled successfully
 Compiling...
-Compiled with warnings.
+Failed to compile.
 
-[eslint] 
-src/api.js
-  Line 7:7:  'TAMIL_LANGUAGE_CODE' is assigned a value but never used  no-unused-vars
+Module not found: Error: Can't resolve './components/Login' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 9:0-39
+Module not found: Error: Can't resolve './components/Login' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
 
-Search for the keywords to learn more about each warning.
-To ignore, add // eslint-disable-next-line to the line before.
+ERROR in ./src/App.js 10:0-41
+Module not found: Error: Can't resolve './components/Navbar' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
 
-WARNING in [eslint] 
-src/api.js
-  Line 7:7:  'TAMIL_LANGUAGE_CODE' is assigned a value but never used  no-unused-vars
+ERROR in ./src/App.js 11:0-37
+Module not found: Error: Can't resolve './components/Home' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
 
-webpack compiled with 1 warning
+ERROR in ./src/App.js 12:0-65
+Module not found: Error: Can't resolve './components/BlurredPosterGuess' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 13:0-67
+Module not found: Error: Can't resolve './components/CharacterMovieMatch' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 14:0-49
+Module not found: Error: Can't resolve './components/MovieBingo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 15:0-55
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/Login' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 9:0-39
+Module not found: Error: Can't resolve './components/Login' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 10:0-41
+Module not found: Error: Can't resolve './components/Navbar' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 11:0-37
+Module not found: Error: Can't resolve './components/Home' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 12:0-65
+Module not found: Error: Can't resolve './components/BlurredPosterGuess' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 13:0-67
+Module not found: Error: Can't resolve './components/CharacterMovieMatch' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 14:0-49
+Module not found: Error: Can't resolve './components/MovieBingo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 15:0-55
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/Navbar' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 10:0-41
+Module not found: Error: Can't resolve './components/Navbar' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 11:0-37
+Module not found: Error: Can't resolve './components/Home' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 12:0-65
+Module not found: Error: Can't resolve './components/BlurredPosterGuess' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 13:0-67
+Module not found: Error: Can't resolve './components/CharacterMovieMatch' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 14:0-49
+Module not found: Error: Can't resolve './components/MovieBingo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 15:0-55
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/Home' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 11:0-37
+Module not found: Error: Can't resolve './components/Home' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 12:0-65
+Module not found: Error: Can't resolve './components/BlurredPosterGuess' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 13:0-67
+Module not found: Error: Can't resolve './components/CharacterMovieMatch' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 14:0-49
+Module not found: Error: Can't resolve './components/MovieBingo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 15:0-55
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/BlurredPosterGuess' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 12:0-65
+Module not found: Error: Can't resolve './components/BlurredPosterGuess' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 13:0-67
+Module not found: Error: Can't resolve './components/CharacterMovieMatch' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 14:0-49
+Module not found: Error: Can't resolve './components/MovieBingo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 15:0-55
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/CharacterMovieMatch' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 13:0-67
+Module not found: Error: Can't resolve './components/CharacterMovieMatch' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 14:0-49
+Module not found: Error: Can't resolve './components/MovieBingo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 15:0-55
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/MovieBingo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 14:0-49
+Module not found: Error: Can't resolve './components/MovieBingo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 15:0-55
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 15:0-55
+Module not found: Error: Can't resolve './components/MovieTimeline' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 16:0-53
+Module not found: Error: Can't resolve './components/SpinTheWheel' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 17:0-47
+Module not found: Error: Can't resolve './components/CastCombo' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+ERROR in ./src/App.js 18:0-57
+Module not found: Error: Can't resolve './components/ResultsDisplay' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src'
+
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Login.js 6:0-21
+Module not found: Error: Can't resolve './Login.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/ResultsDisplay.js 5:0-30
+Module not found: Error: Can't resolve './ResultsDisplay.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 10 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Navbar.js 5:0-22
+Module not found: Error: Can't resolve './Navbar.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/ResultsDisplay.js 5:0-30
+Module not found: Error: Can't resolve './ResultsDisplay.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 9 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/Home.js 5:0-20
+Module not found: Error: Can't resolve './Home.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/ResultsDisplay.js 5:0-30
+Module not found: Error: Can't resolve './ResultsDisplay.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 8 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/BlurredPosterGuess.js 5:0-34
+Module not found: Error: Can't resolve './BlurredPosterGuess.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/ResultsDisplay.js 5:0-30
+Module not found: Error: Can't resolve './ResultsDisplay.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 7 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/CharacterMovieMatch.js 5:0-35
+Module not found: Error: Can't resolve './CharacterMovieMatch.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/ResultsDisplay.js 5:0-30
+Module not found: Error: Can't resolve './ResultsDisplay.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 6 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/ResultsDisplay.js 5:0-30
+Module not found: Error: Can't resolve './ResultsDisplay.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 5 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 4 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieBingo.js 5:0-26
+Module not found: Error: Can't resolve './MovieBingo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 4 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/MovieTimeline.js 5:0-29
+Module not found: Error: Can't resolve './MovieTimeline.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 3 errors
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+ERROR in ./src/components/CastCombo.js 5:0-25
+Module not found: Error: Can't resolve './CastCombo.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+ERROR in ./src/components/SpinTheWheel.js 5:0-28
+Module not found: Error: Can't resolve './SpinTheWheel.css' in '/home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/kollywood_quizmaster/src/components'
+
+webpack compiled with 2 errors
