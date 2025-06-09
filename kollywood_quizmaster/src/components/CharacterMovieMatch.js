@@ -3,13 +3,8 @@ import "./CharacterMovieMatch.css";
 
 // PUBLIC_INTERFACE
 /**
- * CharacterMovieMatch: Each round, user matches a "character" clue ("Vetrimaaran") to the correct movie
- * poster using drag-and-drop. Poster images always use TMDb's poster_path, and drag-and-drop
- * remains robust. The clue is never a director, only "Vetrimaaran" the character.
- *
- * Expects:
- *   - claimMoviesForRound(n), sessionInitialized, initializeSession by MovieSessionContext (App.js)
- *   - onBack, onGameEnd for navigation/results
+ * CharacterMovieMatch: For 10 rounds, present unique character/movie pairs and 4 unique poster options per round (no repeats).
+ * All posters must be valid TMDb images. User drags clue onto poster, advances on drop, shows results summary after round 10.
  */
 function CharacterMovieMatch({
   claimMoviesForRound,
@@ -23,135 +18,132 @@ function CharacterMovieMatch({
   const OPTIONS_PER_ROUND = 4;
   const CLUE = "Vetrimaaran";
 
-  // States
-  const [roundMovies, setRoundMovies] = useState([]);
-  const [rounds, setRounds] = useState([]); // Array of { options: [movieObj], correctIdx, answerIdx, feedback }
-  const [currentRound, setCurrentRound] = useState(0);
-  const [userAnswers, setUserAnswers] = useState([]);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [gameFinished, setGameFinished] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // Hardcoded character/movie pairs (Vetrimaaran as the "character"), all with poster_path
+  const CHARACTER_MOVIES = [
+    {
+      title: "Visaranai",
+      tmdb_id: 374720,
+      poster_path: "/4rCZVG4n5c4IbzIXgHHKcS0QGsw.jpg"
+    },
+    {
+      title: "Aadukalam",
+      tmdb_id: 54858,
+      poster_path: "/4g4sb7TAtrtpemTq9iAXTh9tPfB.jpg"
+    },
+    {
+      title: "Asuran",
+      tmdb_id: 573530,
+      poster_path: "/zggcTQEWh05RzTRiXOBCENcyzmO.jpg"
+    },
+    {
+      title: "Vada Chennai",
+      tmdb_id: 470926,
+      poster_path: "/8HVGjzxubAEANMQggqRAsoe5nBr.jpg"
+    },
+    {
+      title: "Vaanam Kottattum",
+      tmdb_id: 656114,
+      poster_path: "/98zoyzjRNl6jXgKQ5DltM8p6Ndt.jpg"
+    },
+    {
+      title: "Pudhupettai",
+      tmdb_id: 34826,
+      poster_path: "/7DwsS5sz34JEoLNnNm5WYQg2BKy.jpg"
+    },
+    {
+      title: "Polladhavan",
+      tmdb_id: 77895,
+      poster_path: "/gp02lHgVdibgykjSzDbM9YNQJ1l.jpg"
+    },
+    {
+      title: "Kodi",
+      tmdb_id: 422253,
+      poster_path: "/jenRq2UTWyxlL6ZSnM4tPFQyu1J.jpg"
+    },
+    {
+      title: "Udaan (Telugu dubbed)",
+      tmdb_id: 499758,
+      poster_path: "/4N6S8vIOwFI9vHh4zI8hwlPPKaq.jpg"
+    }
+  ].filter(m => m.poster_path); // Remove any no-poster entries
 
-  // Drag-and-drop
-  const [dragActive, setDragActive] = useState(false);
+  // States
+  const [quizRounds, setQuizRounds] = useState([]); // [{ clueMovie, options:[], correctIdx }]
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [userAnswers, setUserAnswers] = useState([]); // [{guessIdx, correctIdx, correct}]
   const [droppedIdx, setDroppedIdx] = useState(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const clueRef = useRef(null);
 
-  // Quiz session setup: each round's correct answer is always "character: Vetrimaaran"
+  // Prepare unique rounds and options pool
   useEffect(() => {
     if (!sessionInitialized) {
       initializeSession();
       setLoading(true);
       return;
     }
-    if (sessionInitialized && roundMovies.length === 0) {
-      // Grab enough movies for fake options pool
-      const claimed = claimMoviesForRound(TOTAL_ROUNDS * 2);
-      if (claimed && claimed.length >= TOTAL_ROUNDS) {
-        setRoundMovies(claimed);
+    if (sessionInitialized && quizRounds.length === 0) {
+      // Claim a large decoy pool from general movies, filter for valid posters and not character-movie
+      let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * 12) || [];
+      if (!Array.isArray(decoyPool)) decoyPool = [];
+      // Only movies with valid, unique poster AND not in character-movie list
+      const characterIds = new Set(CHARACTER_MOVIES.map(m => String(m.tmdb_id)));
+      decoyPool = decoyPool.filter((m, i, arr) =>
+        !!m.poster_path &&
+        arr.findIndex(x => x.poster_path === m.poster_path) === i &&
+        !characterIds.has(String(m.id))
+      );
+      // Prepare quiz with 10 unique, shuffled character-movie pairs
+      const shuffledCorrects = shuffle(CHARACTER_MOVIES).slice(0, TOTAL_ROUNDS);
+
+      // Track all poster paths and decoy movie ids used globally so no option ever repeats
+      const usedPosterPaths = new Set();
+      const usedMovieIds = new Set();
+
+      // Build rounds array
+      const quiz = [];
+      for (let i = 0; i < TOTAL_ROUNDS; i++) {
+        const clueMovie = shuffledCorrects[i];
+        usedPosterPaths.add(clueMovie.poster_path);
+
+        // Decoys: from decoy pool not using any used posters or already-used movieId
+        const availableDecoys = decoyPool.filter(
+          m => !usedPosterPaths.has(m.poster_path) && !usedMovieIds.has(m.id)
+        );
+        const chosenDecoys = shuffle(availableDecoys).slice(0, 3);
+        chosenDecoys.forEach(m => {
+          usedPosterPaths.add(m.poster_path);
+          usedMovieIds.add(m.id);
+        });
+
+        // Compose round options randomly inserting the correct
+        const insertAt = Math.floor(Math.random() * (chosenDecoys.length + 1));
+        const options = [...chosenDecoys];
+        options.splice(insertAt, 0, {
+          title: clueMovie.title,
+          tmdb_id: clueMovie.tmdb_id,
+          poster_path: clueMovie.poster_path
+        });
+
+        quiz.push({
+          clueMovie,
+          options,
+          correctIdx: insertAt
+        });
       }
+      setQuizRounds(quiz);
+      setCurrentIdx(0);
+      setUserAnswers([]);
+      setDroppedIdx(null);
+      setShowFeedback(false);
+      setLoading(false);
     }
     // eslint-disable-next-line
   }, [sessionInitialized, claimMoviesForRound]);
 
-  useEffect(() => {
-    if (roundMovies.length === 0) {
-      setLoading(true);
-      return;
-    }
-    // Hardcoded "movies for the character Vetrimaaran"
-    const vetrimaaranCharacterMovies = [
-      {
-        title: "Visaranai",
-        tmdb_id: 374720,
-        poster_path: "/4rCZVG4n5c4IbzIXgHHKcS0QGsw.jpg"
-      },
-      {
-        title: "Aadukalam",
-        tmdb_id: 54858,
-        poster_path: "/4g4sb7TAtrtpemTq9iAXTh9tPfB.jpg"
-      },
-      {
-        title: "Asuran",
-        tmdb_id: 573530,
-        poster_path: "/zggcTQEWh05RzTRiXOBCENcyzmO.jpg"
-      },
-      {
-        title: "Vada Chennai",
-        tmdb_id: 470926,
-        poster_path: "/8HVGjzxubAEANMQggqRAsoe5nBr.jpg"
-      },
-      {
-        title: "Vaanam Kottattum",
-        tmdb_id: 656114,
-        poster_path: "/98zoyzjRNl6jXgKQ5DltM8p6Ndt.jpg"
-      },
-      {
-        title: "Pudhupettai",
-        tmdb_id: 34826,
-        poster_path: "/7DwsS5sz34JEoLNnNm5WYQg2BKy.jpg"
-      },
-      {
-        title: "Polladhavan",
-        tmdb_id: 77895,
-        poster_path: "/gp02lHgVdibgykjSzDbM9YNQJ1l.jpg"
-      },
-      {
-        title: "Kodi",
-        tmdb_id: 422253,
-        poster_path: "/jenRq2UTWyxlL6ZSnM4tPFQyu1J.jpg"
-      },
-      {
-        title: "Udaan (Telugu dubbed)",
-        tmdb_id: 499758,
-        poster_path: "/4N6S8vIOwFI9vHh4zI8hwlPPKaq.jpg"
-      },
-      {
-        title: "Vetrimaaran Antha Padichava",
-        tmdb_id: 113710,
-        poster_path: ""
-      }
-    ];
-
-    // Shuffle and pick unique corrects for this game round
-    const corrects = vetrimaaranCharacterMovies
-      .sort(() => Math.random() - 0.5)
-      .slice(0, TOTAL_ROUNDS);
-
-    // Build each round
-    const roundsBuilt = [];
-    for (let i = 0; i < TOTAL_ROUNDS; i++) {
-      const correctMovie = { ...corrects[i], character: CLUE };
-      // Decoys: strictly not the correct, must have poster_path
-      const notCorrect = roundMovies
-        .filter(m => String(m.id) !== String(correctMovie.tmdb_id))
-        .filter(m => m.poster_path);
-      const decoys = shuffle(notCorrect).slice(0, 3).map(m => ({
-        title: m.title,
-        tmdb_id: m.id,
-        poster_path: m.poster_path
-      }));
-      const insertAt = Math.floor(Math.random() * 4);
-      const options = [...decoys];
-      options.splice(insertAt, 0, correctMovie);
-      roundsBuilt.push({
-        options,
-        correctIdx: insertAt,
-        answerIdx: null,
-        feedback: ""
-      });
-    }
-    setRounds(roundsBuilt);
-    setLoading(false);
-    setCurrentRound(0);
-    setUserAnswers([]);
-    setShowFeedback(false);
-    setGameFinished(false);
-    setDroppedIdx(null);
-    // eslint-disable-next-line
-  }, [roundMovies]);
-
-  // Drag handlers for the clue
+  // Drag-and-drop handlers
   function onDragStart(e) {
     setDragActive(true);
     e.dataTransfer.effectAllowed = "move";
@@ -166,56 +158,52 @@ function CharacterMovieMatch({
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   }
-  function onDrop(idx) {
-    if (droppedIdx !== null || showFeedback || gameFinished) return;
+  function handleDrop(idx) {
+    if (droppedIdx !== null || showFeedback) return;
     setDroppedIdx(idx);
     setDragActive(false);
-
-    const round = rounds[currentRound];
-    const isCorrect = idx === round.correctIdx;
-    let feedback;
-    if (isCorrect) {
-      feedback = "Correct! This movie fits the Vetrimaaran clue.";
-    } else {
-      feedback = `Incorrect. "${round.options[idx].title}" was not the right answer.`;
-    }
-
-    const newRounds = rounds.slice();
-    newRounds[currentRound] = {
-      ...round,
-      answerIdx: idx,
-      feedback
-    };
-    setRounds(newRounds);
-    setUserAnswers(ans => ans.concat({
-      guess: idx,
-      correct: isCorrect,
-      chosenTitle: round.options[idx]?.title,
-      correctTitle: round.options[round.correctIdx]?.title
-    }));
     setShowFeedback(true);
 
+    const round = quizRounds[currentIdx];
+    const isCorrect = idx === round.correctIdx;
+    setUserAnswers(prev => prev.concat({
+      guessIdx: idx,
+      correctIdx: round.correctIdx,
+      correct: isCorrect,
+      chosenTitle: round.options[idx].title,
+      correctTitle: round.options[round.correctIdx].title
+    }));
+
     setTimeout(() => {
-      if (currentRound + 1 === TOTAL_ROUNDS) {
-        setGameFinished(true);
-        // End of game! Push to results page immediately
+      if (currentIdx + 1 === TOTAL_ROUNDS) {
+        // Game over: show result summary
         if (onGameEnd) {
+          const correctCount =
+            [...userAnswers, { correct: isCorrect }].filter(x => x.correct).length;
           onGameEnd({
-            correct: [...(userAnswers || []), { correct: isCorrect }].filter(x => x.correct).length,
+            correct: correctCount,
             total: TOTAL_ROUNDS,
-            mode: "Character-Movie Match (Vetrimaaran)",
-            answers: [...(userAnswers || []), { guess: idx, correct: isCorrect }],
-            roundMovies: rounds.map(r => r.options[r.correctIdx])
+            mode: "Character-Movie Match",
+            answers: [...userAnswers, {
+              guessIdx: idx,
+              correctIdx: round.correctIdx,
+              correct: isCorrect,
+              chosenTitle: round.options[idx].title,
+              correctTitle: round.options[round.correctIdx].title
+            }],
+            roundMovies: quizRounds.map(r => r.options[r.correctIdx])
           });
         }
       } else {
-        setShowFeedback(false);
+        // Next round
+        setCurrentIdx(c => c + 1);
         setDroppedIdx(null);
-        setCurrentRound(c => c + 1);
+        setShowFeedback(false);
       }
-    }, 1600);
+    }, 1200);
   }
 
+  // Utility shuffle (Fisher-Yates)
   function shuffle(array) {
     const arr = array.slice();
     for (let i = arr.length - 1; i > 0; i--) {
@@ -225,7 +213,7 @@ function CharacterMovieMatch({
     return arr;
   }
 
-  // Robust poster UI – fallback to placeholder, never broken/broken link
+  // Poster rendering helper
   function renderPoster(movie) {
     return movie.poster_path
       ? (
@@ -266,8 +254,11 @@ function CharacterMovieMatch({
       );
   }
 
-  // Wait for rounds to be built
-  if (loading || rounds.length === 0 || currentRound >= rounds.length) {
+  // LOADING states
+  if (loading || quizRounds.length === 0 ||
+    currentIdx >= quizRounds.length ||
+    !quizRounds[currentIdx]
+  ) {
     return (
       <div className="game-panel glass-panel">
         <button className="btn btn-back" onClick={onBack}>← Back</button>
@@ -277,7 +268,8 @@ function CharacterMovieMatch({
     );
   }
 
-  const round = rounds[currentRound] || {};
+  // MAIN ROUND UI
+  const round = quizRounds[currentIdx];
   return (
     <div className="game-panel glass-panel">
       <button className="btn btn-back" onClick={onBack}>← Back</button>
@@ -287,7 +279,7 @@ function CharacterMovieMatch({
           fontSize: "1rem",
           fontWeight: 400,
           marginLeft: 8
-        }}>(Q{currentRound + 1}/{TOTAL_ROUNDS})</span>
+        }}>(Q{currentIdx + 1}/{TOTAL_ROUNDS})</span>
       </h2>
       <div style={{ marginTop: 10, marginBottom: 14 }}>
         <b>Instructions:</b><br />
@@ -297,11 +289,11 @@ function CharacterMovieMatch({
           All clues represent only the character "Vetrimaaran".
         </span>
       </div>
-      {/* Draggable clue */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
+        {/* DRAGGABLE CLUE */}
         <div
           ref={clueRef}
-          draggable={droppedIdx === null && !showFeedback && !gameFinished}
+          draggable={droppedIdx === null && !showFeedback}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
           style={{
@@ -313,7 +305,7 @@ function CharacterMovieMatch({
             padding: "15px 32px",
             fontSize: "1.7rem",
             marginBottom: 8,
-            cursor: droppedIdx === null && !showFeedback && !gameFinished ? "grab" : "not-allowed",
+            cursor: droppedIdx === null && !showFeedback ? "grab" : "not-allowed",
             opacity: droppedIdx !== null || showFeedback ? 0.35 : 1,
             boxShadow: dragActive ? "0 0 19px #fb00ff77" : "",
             transition: "opacity 0.2s, box-shadow 0.15s"
@@ -329,7 +321,7 @@ function CharacterMovieMatch({
             color: "#fff9"
           }}>Character</span>
         </div>
-        {/* Options/panels */}
+        {/* POSTER OPTIONS GRID */}
         <div
           style={{
             display: "grid",
@@ -343,8 +335,8 @@ function CharacterMovieMatch({
             round.options.map((movie, idx) => (
               <div
                 key={movie.tmdb_id + "-" + idx}
-                onDragOver={droppedIdx === null && !showFeedback && !gameFinished ? onDragOver : undefined}
-                onDrop={droppedIdx === null && !showFeedback && !gameFinished ? () => onDrop(idx) : undefined}
+                onDragOver={droppedIdx === null && !showFeedback ? onDragOver : undefined}
+                onDrop={droppedIdx === null && !showFeedback ? () => handleDrop(idx) : undefined}
                 tabIndex={0}
                 className="poster-drop"
                 style={{
@@ -363,11 +355,11 @@ function CharacterMovieMatch({
                   display: "flex", flexDirection: "column", alignItems: "center",
                   justifyContent: "center",
                   opacity: droppedIdx !== null && droppedIdx !== idx ? 0.52 : 1,
-                  cursor: droppedIdx === null && !showFeedback && !gameFinished ? "pointer" : "not-allowed",
+                  cursor: droppedIdx === null && !showFeedback ? "pointer" : "not-allowed",
                   position: "relative",
                   transition: "all 0.19s"
                 }}
-                aria-dropeffect={droppedIdx === null && !showFeedback && !gameFinished ? "move" : "none"}
+                aria-dropeffect={droppedIdx === null && !showFeedback ? "move" : "none"}
               >
                 {renderPoster(movie)}
                 <div
@@ -393,7 +385,9 @@ function CharacterMovieMatch({
                     fontSize: "1rem",
                     minHeight: 22,
                   }}>
-                    {round.feedback}
+                    {idx === round.correctIdx
+                      ? "Correct! This movie fits the Vetrimaaran clue."
+                      : `"${movie.title}" was not the right answer.`}
                   </div>
                 )}
               </div>
@@ -405,14 +399,13 @@ function CharacterMovieMatch({
               color: droppedIdx === round.correctIdx ? "#29c777" : "#fb00ff",
               fontWeight: 500,
               fontSize: "1.13rem"
-            }}>{round.feedback}</span>
+            }}>
+              {droppedIdx === round.correctIdx
+                ? "Correct! This movie fits the Vetrimaaran clue."
+                : `"${round.options[droppedIdx]?.title}" was not the right answer.`}
+            </span>
           )}
         </div>
-        {gameFinished && (
-          <div style={{ marginTop: 28 }}>
-            <b>End of Round!</b>
-          </div>
-        )}
       </div>
     </div>
   );
