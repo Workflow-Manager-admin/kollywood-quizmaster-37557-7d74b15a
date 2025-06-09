@@ -3,8 +3,8 @@ import "./CharacterMovieMatch.css";
 
 // PUBLIC_INTERFACE
 /**
- * CharacterMovieMatch: 10 questions, each with a unique character/movie pair and 4 unique movie poster options (no repeats).
- * Each round: drag the character clue onto a poster. Auto-advance after drop. On round 10, show results summary (score, feedback).
+ * CharacterMovieMatch: 10 rounds with a unique character/movie clue and 4 unique, valid poster movie options (no repeats per session).
+ * Each round: drag the clue to a poster. Auto-advance after drop. Show end-of-game result with feedback and score summary.
  *
  * @param {{
  *   claimMoviesForRound: function,
@@ -23,11 +23,14 @@ function CharacterMovieMatch({
   onGameEnd,
   onBack,
 }) {
+  // Game constants
   const TOTAL_ROUNDS = 10;
   const OPTIONS_PER_ROUND = 4;
+  // Character/Director for the round
   const CHARACTER = "Vetrimaaran";
 
-  // Hardcoded unique Vetrimaaran movies with poster_path (for clues)
+  // Hardcoded list of Vetrimaaran movies with posters (as clues)
+  // Note: Must be at least 10 for 10 rounds
   const CHARACTER_MOVIES = [
     {
       title: "Visaranai",
@@ -73,21 +76,26 @@ function CharacterMovieMatch({
       title: "Udaan (Telugu dubbed)",
       tmdb_id: 499758,
       poster_path: "/4N6S8vIOwFI9vHh4zI8hwlPPKaq.jpg"
+    },
+    {
+      title: "Visiri",
+      tmdb_id: 593246,
+      poster_path: "/U3tOgLGwawx9CUIELTSfKQnIus.jpg"
     }
-  ].filter(m => m.poster_path);
+  ].filter(m => !!m.poster_path);
 
-  // Component State
+  // State
   const [quizRounds, setQuizRounds] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [userGuesses, setUserGuesses] = useState([]);
-  const [droppedIdx, setDroppedIdx] = useState(null);
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [userGuesses, setUserGuesses] = useState([]); // each: {guessIdx, correctIdx, correct, chosenTitle, correctTitle}
+  const [droppedIdx, setDroppedIdx] = useState(null); // user's drop this round
+  const [showFeedback, setShowFeedback] = useState(false); // animate feedback overlay
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const clueRef = useRef(null);
 
-  // Helper: Fisher-Yates shuffle (pure function)
+  // Helper: Shuffle array (pure, not mutating passed-in)
   function shuffle(array) {
     const arr = array.slice();
     for (let i = arr.length - 1; i > 0; i--) {
@@ -97,7 +105,8 @@ function CharacterMovieMatch({
     return arr;
   }
 
-  // Prepare quiz rounds (unique character/movies, no options repeated), fetch decoys from claimMoviesForRound
+  // On mount/setup: build quizRounds: 
+  // (1 unique character-movie per round, 3 decoys per round, posters never reused, movies never repeated)
   useEffect(() => {
     if (!sessionInitialized) {
       initializeSession();
@@ -105,42 +114,46 @@ function CharacterMovieMatch({
       return;
     }
     if (sessionInitialized && quizRounds.length === 0) {
-      // Claim decoys pool - large enough for all options
-      let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * 16) || [];
+      // Claim a decoy pool big enough for all decoy needs
+      // At most 10 rounds × 3 decoys = 30, but we claim more to reject movies with invalid images, etc.
+      let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * 10) || [];
       if (!Array.isArray(decoyPool)) decoyPool = [];
-      // Filter out any missing posters or ones in CHARACTER_MOVIES
+      // Remove any with missing posters or sharing poster with any clue (no repeats)
       const characterIds = new Set(CHARACTER_MOVIES.map(m => String(m.tmdb_id)));
       decoyPool = decoyPool.filter(
         m =>
-          m.poster_path &&
+          !!m.poster_path &&
           !characterIds.has(String(m.id)) &&
           m.title
       );
-      // Shuffle and trim
+      // Shuffle to randomize order
       decoyPool = shuffle(decoyPool);
 
-      // Pick 10 unique character-movie pairs
-      const shuffledTargets = shuffle(CHARACTER_MOVIES).slice(0, Math.min(TOTAL_ROUNDS, CHARACTER_MOVIES.length));
+      const availableClues = shuffle(CHARACTER_MOVIES).slice(0, TOTAL_ROUNDS);
       const usedPosters = new Set();
       const usedMovieIds = new Set();
 
-      // Compose quiz rounds
+      // Compose quizRounds
       const rounds = [];
-      for (let i = 0; i < shuffledTargets.length; i++) {
-        const clueMovie = shuffledTargets[i];
+      for (let i = 0; i < availableClues.length; ++i) {
+        const clueMovie = availableClues[i];
         usedPosters.add(clueMovie.poster_path);
         usedMovieIds.add(clueMovie.tmdb_id);
 
-        // Decoy candidates (with unique posters, never already used by clue or other rounds)
+        // Only allow decoys that have not been used as options for any prior round
+        // and do not share poster with any clue or earlier option.
         const validDecoys = decoyPool.filter(
           m =>
             !usedPosters.has(m.poster_path) &&
             !usedMovieIds.has(m.id)
         );
         const chosenDecoys = shuffle(validDecoys).slice(0, OPTIONS_PER_ROUND - 1);
-        chosenDecoys.forEach(d => { usedPosters.add(d.poster_path); usedMovieIds.add(d.id); });
+        chosenDecoys.forEach(d => {
+          usedPosters.add(d.poster_path);
+          usedMovieIds.add(d.id);
+        });
 
-        // Insert correct answer at a random position
+        // Insert correct answer at random position
         const insertAt = Math.floor(Math.random() * OPTIONS_PER_ROUND);
         const options = chosenDecoys.slice();
         options.splice(insertAt, 0, {
@@ -155,6 +168,7 @@ function CharacterMovieMatch({
           correctIdx: insertAt
         });
       }
+
       setQuizRounds(rounds);
       setCurrentIdx(0);
       setUserGuesses([]);
@@ -165,7 +179,7 @@ function CharacterMovieMatch({
     // eslint-disable-next-line
   }, [sessionInitialized, claimMoviesForRound]);
 
-  // Drag event handlers
+  // ---- Drag/drop events ----
   function onDragStart(e) {
     setDragActive(true);
     e.dataTransfer.effectAllowed = "move";
@@ -181,6 +195,7 @@ function CharacterMovieMatch({
     e.dataTransfer.dropEffect = "move";
   }
   function handleDrop(idx) {
+    // Don't allow if already answered or feedback is ongoing
     if (droppedIdx !== null || showFeedback) return;
     setDroppedIdx(idx);
     setDragActive(false);
@@ -198,10 +213,10 @@ function CharacterMovieMatch({
       })
     );
 
-    // Auto-advance after feedback delay
+    // Auto-advance after feedback
     setTimeout(() => {
       if (currentIdx + 1 === quizRounds.length) {
-        // End of game
+        // End of game, call summary handler
         if (onGameEnd) {
           const correctCount =
             [...userGuesses, { correct: isCorrect }].filter(ans => ans.correct).length;
@@ -230,7 +245,7 @@ function CharacterMovieMatch({
     }, 1200);
   }
 
-  // Rendering helper: display poster or fallback
+  // Poster rendering helper (handles missing poster gracefully)
   function renderPoster(movie) {
     return movie.poster_path ? (
       <img
@@ -279,8 +294,14 @@ function CharacterMovieMatch({
     );
   }
 
-  // Loading and unavailable states
-  if (loading || quizRounds.length === 0 || currentIdx >= quizRounds.length || !quizRounds[currentIdx]) {
+  // Fallback loader/unavailable state
+  if (
+    loading ||
+    !Array.isArray(quizRounds) ||
+    quizRounds.length === 0 ||
+    currentIdx >= quizRounds.length ||
+    !quizRounds[currentIdx]
+  ) {
     return (
       <div className="game-panel glass-panel">
         <button className="btn btn-back" onClick={onBack}>← Back</button>
