@@ -23,21 +23,11 @@ function MovieTimeline({
       const claimed = claimMoviesForRound(NUM_MOVIES);
       if (claimed && claimed.length === NUM_MOVIES) {
         setRoundMovies(claimed);
-        setOrderedIds(shuffleIds(claimed.map(m=>m.id)));
+        setOrderedIds(shuffleIds(claimed.map(m => m.id)));
       }
     }
     // eslint-disable-next-line
   }, [sessionInitialized, claimMoviesForRound]);
-
-  function shuffleIds(array) {
-    // Simple Fisher-Yates shuffle
-    const arr = array.slice();
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
 
   if (roundMovies.length === 0) {
     return (
@@ -49,12 +39,22 @@ function MovieTimeline({
     );
   }
 
+  function shuffleIds(array) {
+    // Simple Fisher-Yates shuffle
+    const arr = array.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   // Lookup map: id -> movie object
-  const movieMap = Object.fromEntries(roundMovies.map(m=>[m.id,m]));
+  const movieMap = Object.fromEntries(roundMovies.map(m => [m.id, m]));
   // What is the correct order (ascending by release year)?
   const timelineOrder = roundMovies
     .slice()
-    .sort((a,b) => (a.release_date || "9999").localeCompare(b.release_date || "9999"))
+    .sort((a, b) => (a.release_date || "9999").localeCompare(b.release_date || "9999"))
     .map(m => m.id);
 
   function move(idx, dir) {
@@ -85,12 +85,12 @@ function MovieTimeline({
   return (
     <div className="game-panel glass-panel">
       <button className="btn btn-back" onClick={onBack}>← Back</button>
-      <h2>⏳ Movie Timeline Challenge <span style={{ fontSize:"1rem",fontWeight:400}}>({roundMovies.length} movies)</span></h2>
+      <h2>⏳ Movie Timeline Challenge <span style={{ fontSize: "1rem", fontWeight: 400 }}>({roundMovies.length} movies)</span></h2>
       <div>
         <p>Reorder movies chronologically (earliest release first)</p>
         <div
           style={{
-            display:'flex',flexDirection:'row',flexWrap:'wrap',gap:'8px',justifyContent:'center',marginBottom:14
+            display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: 14
           }}
         >
           {orderedIds.map((mid, idx) => (
@@ -98,28 +98,28 @@ function MovieTimeline({
               key={mid}
               className="btn"
               style={{
-                width:'170px',
-                minHeight:'50px',
+                width: '170px',
+                minHeight: '50px',
                 background: submitted
-                  ? (timelineOrder[idx] === mid ?'#29c777' :'#fb00ff33')
+                  ? (timelineOrder[idx] === mid ? '#29c777' : '#fb00ff33')
                   : 'var(--card-bg)',
                 color: submitted
                   ? '#fff'
                   : '#fb00ff',
-                borderRadius:'8px',
-                border:'2px solid var(--border-color)',
-                display:'flex',alignItems:'center',justifyContent:'space-between',
-                fontWeight:600,
-                transition:'background .18s'
+                borderRadius: '8px',
+                border: '2px solid var(--border-color)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                fontWeight: 600,
+                transition: 'background .18s'
               }}
             >
               <span>{movieMap[mid]?.title || "??"}</span>
-              <span style={{marginLeft:9}}><b>{submitted ? (movieMap[mid]?.release_date?.substring(0,4) ?? "?") : null}</b></span>
+              <span style={{ marginLeft: 9 }}><b>{submitted ? (movieMap[mid]?.release_date?.substring(0, 4) ?? "?") : null}</b></span>
               {!submitted && (
                 <span>
-                  <button className="btn" style={{fontSize:18,padding:"1px 8px 2px 7px",marginLeft:9}}
-                    disabled={idx===0} onClick={()=>move(idx,-1)}>&lt;</button>
-                  <button className="btn" style={{fontSize:18,padding:"1px 7px 2px 8px"}} disabled={idx===orderedIds.length-1} onClick={()=>move(idx,1)}>&gt;</button>
+                  <button className="btn" style={{ fontSize: 18, padding: "1px 8px 2px 7px", marginLeft: 9 }}
+                    disabled={idx === 0} onClick={() => move(idx, -1)}>&lt;</button>
+                  <button className="btn" style={{ fontSize: 18, padding: "1px 7px 2px 8px" }} disabled={idx === orderedIds.length - 1} onClick={() => move(idx, 1)}>&gt;</button>
                 </span>
               )}
             </div>

@@ -26,8 +26,7 @@ function MovieBingo({
       const claimed = claimMoviesForRound(ROUND_SIZE);
       if (claimed && claimed.length === ROUND_SIZE) {
         setRoundMovies(claimed);
-        // Draw a random category
-        setCategory(CATEGORY_KEYWORDS[Math.floor(Math.random()*CATEGORY_KEYWORDS.length)]);
+        setCategory(CATEGORY_KEYWORDS[Math.floor(Math.random() * CATEGORY_KEYWORDS.length)]);
       }
     }
     // eslint-disable-next-line
@@ -45,7 +44,7 @@ function MovieBingo({
 
   // Simulate "matches category" as movie whose title or overview contains the keyword
   const filterByCategory = (m, cat) => {
-    const field = (m.title+" "+(m.overview||"")).toLowerCase();
+    const field = (m.title + " " + (m.overview || "")).toLowerCase();
     return field.includes(cat.toLowerCase());
   };
   const correctIds = roundMovies.filter(m => filterByCategory(m, category)).map(m => m.id);
@@ -71,13 +70,13 @@ function MovieBingo({
     <div className="game-panel glass-panel">
       <button className="btn btn-back" onClick={onBack}>← Back</button>
       <h2>🎲 Movie Bingo</h2>
-      <div style={{marginBottom:'8px'}}>
+      <div style={{ marginBottom: '8px' }}>
         <b>Category:</b>
-        <span style={{color:"#fb00ff",marginLeft:6}}>{category}</span>
-        <span style={{fontSize:'0.9em',color:'#fff7',marginLeft:8}}>{correctIds.length} correct in grid</span>
+        <span style={{ color: "#fb00ff", marginLeft: 6 }}>{category}</span>
+        <span style={{ fontSize: '0.9em', color: '#fff7', marginLeft: 8 }}>{correctIds.length} correct in grid</span>
       </div>
       <div style={{
-        display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'8px 6px',margin:'0 auto',maxWidth:450
+        display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '8px 6px', margin: '0 auto', maxWidth: 450
       }}>
         {roundMovies.map(movie =>
           <button
@@ -99,7 +98,7 @@ function MovieBingo({
                   ? '#fff'
                   : '#fb00ff',
               fontWeight: 600,
-              padding:'12px 4px',
+              padding: '12px 4px',
               border: '2px solid var(--border-color)',
               borderRadius: '9px',
               cursor: !answered ? 'pointer' : 'default',
@@ -112,7 +111,7 @@ function MovieBingo({
           </button>
         )}
       </div>
-      <div style={{marginTop:14}}>
+      <div style={{ marginTop: 14 }}>
         {!answered ? (
           <button className="btn" onClick={handleFinish} disabled={Object.values(selected).every(v => !v)}>
             Submit Bingo Picks

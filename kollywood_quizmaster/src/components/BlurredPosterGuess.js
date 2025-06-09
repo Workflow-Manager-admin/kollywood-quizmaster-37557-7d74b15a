@@ -53,8 +53,7 @@ function BlurredPosterGuess({
       setShowAnswer(false);
     } else {
       // Game over: calculate result and signal end
-      const correct = userGuesses.filter(g => g.correct).length + (showAnswer && userGuesses.length < roundMovies.length
-        ? 0 : 0); // if last answer not submitted, show partial
+      const correct = userGuesses.filter(g => g.correct).length;
       onGameEnd({
         correct,
         total: roundMovies.length,
@@ -64,6 +63,22 @@ function BlurredPosterGuess({
       });
     }
   }
+
+  // Auto-advance to next question or dashboard after answer/reveal
+  React.useEffect(() => {
+    if (showAnswer) {
+      const isLast = currentIdx === roundMovies.length - 1;
+      const timer = setTimeout(() => {
+        if (isLast) {
+          nextQuestion(); // This will trigger onGameEnd
+        } else {
+          nextQuestion();
+        }
+      }, 1100); // Delay for answer feedback before advancing
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line
+  }, [showAnswer]);
 
   // Loading and fallback states
   if (roundMovies.length === 0 && (remainingCount === undefined || remainingCount >= TOTAL_ROUNDS)) {

@@ -19,6 +19,7 @@ function CharacterMovieMatch({
   const [userAnswers, setUserAnswers] = useState([]);
   const [showAnswer, setShowAnswer] = useState(false);
 
+  // HOOKS -- must be above all derived variables and returns
   useEffect(() => {
     if (!sessionInitialized) initializeSession();
     if (sessionInitialized && roundMovies.length === 0) {
@@ -30,6 +31,17 @@ function CharacterMovieMatch({
     // eslint-disable-next-line
   }, [sessionInitialized, claimMoviesForRound]);
 
+  useEffect(() => {
+    if (showAnswer && roundMovies.length > 0) {
+      const timer = setTimeout(() => {
+        nextQuestion();
+      }, 1100);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line
+  }, [showAnswer, roundMovies.length, currentIdx]);
+
+  // Early return after hooks, before variable declarations
   if (roundMovies.length === 0) {
     return (
       <div className="game-panel glass-panel">
@@ -40,6 +52,7 @@ function CharacterMovieMatch({
     );
   }
 
+  // --- Variables declared after all early returns/hook zone
   const movie = roundMovies[currentIdx];
 
   // Simulated: Pick a "character" string fragment from movie title for clue
@@ -72,35 +85,35 @@ function CharacterMovieMatch({
   return (
     <div className="game-panel glass-panel">
       <button className="btn btn-back" onClick={onBack}>← Back</button>
-      <h2>👤 Character-Movie Match <span style={{ fontSize:"1rem",fontWeight:400}}>(Q{currentIdx+1}/{roundMovies.length})</span></h2>
+      <h2>👤 Character-Movie Match <span style={{ fontSize: "1rem", fontWeight: 400 }}>(Q{currentIdx + 1}/{roundMovies.length})</span></h2>
       <div>
         <div>
-          <strong>Which movie has the character <span style={{color:"#fb00ff"}}>"{fakeCharacter}"</span>?</strong>
+          <strong>Which movie has the character <span style={{ color: "#fb00ff" }}>"{fakeCharacter}"</span>?</strong>
         </div>
         <br />
         {showAnswer ? (
           <div>
-            <b>Correct movie:</b> <span style={{color:'#fb00ff'}}>{movie.title}</span>
-            <br/>
+            <b>Correct movie:</b> <span style={{ color: '#fb00ff' }}>{movie.title}</span>
+            <br />
             {(userAnswers[currentIdx] && userAnswers[currentIdx].guess) &&
               <span>
                 Your answer: <b>{userAnswers[currentIdx].guess}</b>
                 {userAnswers[currentIdx].correct
-                  ? <span style={{color:'limegreen',marginLeft:6}}>✓ Correct!</span>
-                  : <span style={{color:'#fa0',marginLeft:6}}>✗ Incorrect</span>
+                  ? <span style={{ color: 'limegreen', marginLeft: 6 }}>✓ Correct!</span>
+                  : <span style={{ color: '#fa0', marginLeft: 6 }}>✗ Incorrect</span>
                 }
               </span>
             }
             <div>
-              <button className="btn" style={{marginTop:12}} onClick={nextQuestion}>
-                {currentIdx+1 === roundMovies.length ? "Finish Round" : "Next"}
+              <button className="btn" style={{ marginTop: 12 }} onClick={nextQuestion}>
+                {currentIdx + 1 === roundMovies.length ? "Finish Round" : "Next"}
               </button>
             </div>
           </div>
         ) : (
           <form
-            onSubmit={e=>{e.preventDefault();submitGuess(e.target.elements.movie.value);}}
-            style={{marginTop:10,display:'flex',gap:10,flexDirection:'column',alignItems:'center'}}
+            onSubmit={e => { e.preventDefault(); submitGuess(e.target.elements.movie.value); }}
+            style={{ marginTop: 10, display: 'flex', gap: 10, flexDirection: 'column', alignItems: 'center' }}
           >
             <input
               type="text"
@@ -108,12 +121,12 @@ function CharacterMovieMatch({
               placeholder="Guess the movie"
               required
               style={{
-                fontSize:'1.09rem',padding:'7px 10px',borderRadius:'6px',
-                background:'#20052a',color:'#fff',border:'1px solid var(--border-color)',width: '210px'
+                fontSize: '1.09rem', padding: '7px 10px', borderRadius: '6px',
+                background: '#20052a', color: '#fff', border: '1px solid var(--border-color)', width: '210px'
               }}
             />
             <button className="btn" type="submit">Submit</button>
-            <button className="btn" type="button" style={{background:"#111",color:"#fb00ff"}} onClick={()=>setShowAnswer(true)}>
+            <button className="btn" type="button" style={{ background: "#111", color: "#fb00ff" }} onClick={() => setShowAnswer(true)}>
               Reveal Answer
             </button>
           </form>
