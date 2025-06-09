@@ -24,9 +24,8 @@ const GAME_MODES = [
   { key: 'cast-combo', name: 'Cast Combo', component: CastCombo },
 ];
 
-function GameRouter({ activeGame, user, onGameEnd, onBack, results }) {
+function GameRouter({ activeGame, user, onGameEnd, onBack, onSelectGame, results }) {
   // We are inside MovieSessionProvider here and can useMovieSession if needed
-  // To allow stubs to continue, we still pass loading and movies for now
 
   const { sessionInitialized, initializeSession, resetSession, claimMoviesForRound, claimNextMovie, wasMovieClaimed, remainingCount, claimedIds } =
     useMovieSession();
@@ -72,7 +71,7 @@ function GameRouter({ activeGame, user, onGameEnd, onBack, results }) {
       <Home
         movies={[]} // real games should use the context
         loading={false}
-        onSelectGame={onBack}
+        onSelectGame={onSelectGame}
         username={user?.username}
       />
     </div>
@@ -141,6 +140,7 @@ function App() {
           user={user}
           onGameEnd={handleGameEnd}
           onBack={() => setActiveGame(null)}
+          onSelectGame={handleSelectGame}
           results={results}
         />
         {/* Home uses onBack as goto-home, results uses resetSession when leaving results in GameRouter */}
