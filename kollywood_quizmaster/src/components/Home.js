@@ -47,6 +47,7 @@ const MODES = [
  * @param {{movies: Array, loading: boolean, onSelectGame: Function, username: string}} props
  */
 function Home({ movies, loading, onSelectGame, username }) {
+  const movieCount = movies && Array.isArray(movies) ? movies.length : 0;
   return (
     <div className="home-panel glass-panel">
       <div className="home-header">
@@ -55,7 +56,7 @@ function Home({ movies, loading, onSelectGame, username }) {
         <p className="description">
           Challenge yourself across six game types featuring real Kollywood data.<br/>
           {loading ? <em>Loading movie data...</em>
-            : <span className="movie-count">({movies.length} Kollywood movies loaded)</span>}
+            : <span className="movie-count">({movieCount} Kollywood movies loaded)</span>}
         </p>
       </div>
       <div className="game-cards-grid">

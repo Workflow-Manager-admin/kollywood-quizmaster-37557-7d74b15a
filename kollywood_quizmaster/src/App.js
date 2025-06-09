@@ -91,10 +91,10 @@ function App() {
   const [loadingMovies, setLoadingMovies] = useState(true);
 
   useEffect(() => {
-    // Load Kollywood movies on mount
+    // Load Kollywood movies on mount (filtered to moderate difficulty)
     fetchKollywoodMovies()
       .then(data => {
-        setKollywoodMovies(data.results || []);
+        setKollywoodMovies(Array.isArray(data.results) ? data.results : []);
         setLoadingMovies(false);
       })
       .catch(_err => setLoadingMovies(false));
