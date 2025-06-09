@@ -73,8 +73,12 @@ function CharacterMovieMatch({
       return;
     }
     if (sessionInitialized && quizRounds.length === 0) {
-      // Claim enough movies for all rounds (min 40), fallback to available.
-      let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * OPTIONS_PER_ROUND) || [];
+      // Defensive: Try to claim movies, retry fallback if null or not enough
+      let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * OPTIONS_PER_ROUND);
+      if (!Array.isArray(decoyPool) || decoyPool.length < TOTAL_ROUNDS * OPTIONS_PER_ROUND) {
+        // Try to claim as many as possible, fallback
+        decoyPool = claimMoviesForRound(Math.max(0, remainingCount)) || [];
+      }
       if (!Array.isArray(decoyPool)) decoyPool = [];
       // Use only movies with good posters/titles
       const suitablePool = decoyPool.filter(m => !!m.poster_path && !!m.title);
@@ -83,7 +87,12 @@ function CharacterMovieMatch({
         Math.floor(suitablePool.length / OPTIONS_PER_ROUND),
         TOTAL_ROUNDS
       );
-      if (roundCount < 1) roundCount = 1;
+      // If not enough for even a single round, set fallback state and stop
+      if (roundCount < 1) {
+        setQuizRounds([]); // signals "not enough" below
+        setLoading(false);
+        return;
+      }
       const shuffled = shuffle(suitablePool);
       const usedIds = new Set();
       const rounds = [];
@@ -93,7 +102,11 @@ function CharacterMovieMatch({
         let options = [];
         let tries = 0;
         // greedy: skip usedIds, add up to 4 unique
-        while (options.length < OPTIONS_PER_ROUND && offset < shuffled.length && tries < 10 * OPTIONS_PER_ROUND) {
+        while (
+          options.length < OPTIONS_PER_ROUND &&
+          offset < shuffled.length &&
+          tries < 10 * OPTIONS_PER_ROUND
+        ) {
           const candidate = shuffled[offset++];
           if (!candidate) break;
           // No repeats globally among options
@@ -121,7 +134,7 @@ function CharacterMovieMatch({
             tmdb_id: m.id,
             poster_path: m.poster_path,
           })),
-          correctIdx: answerIdx
+          correctIdx: answerIdx,
         });
       }
       setQuizRounds(rounds);
@@ -132,7 +145,7 @@ function CharacterMovieMatch({
       setLoading(false);
     }
     // eslint-disable-next-line
-  }, [sessionInitialized, claimMoviesForRound]);
+  }, [sessionInitialized, claimMoviesForRound, remainingCount]);
 
   // ---- Drag/drop events ----
   function onDragStart(e) {
@@ -263,10 +276,30 @@ function CharacterMovieMatch({
   }
 
   // Loader for preparation
+  if (loading) {
+    return (
+      <div className="game-panel glass-panel">
+        <button className="btn btn-back" onClick={onBack}>
+          ← Back
+        </button>
+        <h2>🎬 Character-Movie Match</h2>
+        <em>Preparing your character-movie match round...</em>
+      </div>
+    );
+  }
+  if (!Array.isArray(quizRounds) || quizRounds.length === 0) {
+    // Not enough data for a round: show an error (not stuck)
+    return (
+      <div className="game-panel glass-panel">
+        <button className="btn btn-back" onClick={onBack}>
+          ← Back
+        </button>
+        <h2>🎬 Character-Movie Match</h2>
+        <p><b>Sorry, not enough unique Kollywood movie data is available to generate a round.<br />Please try a different game or reload once more movies are available.</b></p>
+      </div>
+    );
+  }
   if (
-    loading ||
-    !Array.isArray(quizRounds) ||
-    quizRounds.length === 0 ||
     currentIdx >= quizRounds.length ||
     !quizRounds[currentIdx]
   ) {
