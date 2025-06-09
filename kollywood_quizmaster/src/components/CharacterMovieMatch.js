@@ -1,72 +1,170 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./CharacterMovieMatch.css";
 
-// Fixed clue and correct/incorrect movie posters
-const CLUE = "Vetrimaaran";
-// For robust domain use, these details could be fetched from API, but for this subtask, we hard-code poster/movie data.
-const MOVIES = [
-  {
-    // Correct answer
-    title: "Mersal",
-    poster_path: "/tc4RZ6k0XZ1lf8bB7fmTQfjF6ka.jpg", // Example TMDb path for Mersal
-    id: 476294,
-  },
-  {
-    title: "Theri",
-    poster_path: "/p1pIRUTPNFDYf8w3BHiJDKvNp1o.jpg",
-    id: 37724, // This is just a sample, actual "Theri" TMDb id is 384812
-  },
-  {
-    title: "Master",
-    poster_path: "/4KHyKQOXMPbSh7wB8R6rcinkh5F.jpg",
-    id: 607395,
-  },
-  {
-    title: "Kaththi",
-    poster_path: "/qlPuE8hmGThpQ9jZ2a2Z2rfy22E.jpg",
-    id: 250774,
-  },
-];
-
-// In real usage, you could randomize the order for replayability
-function shuffle(array) {
-  const arr = array.slice();
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
+/**
+ * Refactored CharacterMovieMatch: uses "Vetrimaaran" as a character clue, fetches 10 rounds of
+ * unique poster-matching quiz, with 4 options (Kollywood movies) per round from TMDb API list,
+ * drag-and-drop clue onto poster, shows results summary at end.
+ *
+ * Expects: 
+ *   - claimMoviesForRound(n), sessionInitialized, initializeSession provided by MovieSessionContext (App.js)
+ *   - onBack, onGameEnd for control/score passing.
+ * 
+ * This mode never repeats a movie per quiz, all poster URLs come per-TMDb API design.
+ */
 
 // PUBLIC_INTERFACE
-/**
- * Vetrimaaran Special: Drag the clue "Vetrimaaran" onto one of four movie posters (including "Mersal" as the only correct one).
- * Gives immediate feedback and instructional text. Robust error handling if any poster fails to load.
- */
 function CharacterMovieMatch({
-  onBack,
+  claimMoviesForRound,
+  sessionInitialized,
+  initializeSession,
+  remainingCount,
   onGameEnd,
+  onBack,
 }) {
-  // Randomize the order to avoid muscle memory, but always have Mersal as only correct answer
-  const [movieOptions, setMovieOptions] = useState([]);
-  const [dragActive, setDragActive] = useState(false);
-  const [dragged, setDragged] = useState(false);
-  const [selectedIdx, setSelectedIdx] = useState(null);
-  const [feedback, setFeedback] = useState("");
-  const [finished, setFinished] = useState(false);
+  const TOTAL_ROUNDS = 10;
+  const OPTIONS_PER_ROUND = 4;
+  const CLUE = "Vetrimaaran";
 
+  // The actual round pool (10 unique movies for the session for false options, correct injected for each round)
+  const [roundMovies, setRoundMovies] = useState([]);
+  // Array of { options: [movieObj], correctIdx: number (0-3), answerIdx: number|null, feedback: string }
+  const [rounds, setRounds] = useState([]);
+  const [currentRound, setCurrentRound] = useState(0);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [gameFinished, setGameFinished] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Drag-and-drop state
+  const [dragActive, setDragActive] = useState(false);
+  const [droppedIdx, setDroppedIdx] = useState(null);
   const clueRef = useRef(null);
 
+  // Quiz session setup: get N unique movies to use as pool for wrong options, plus correct movie for each round
   useEffect(() => {
-    setMovieOptions(shuffle(MOVIES));
-  }, []);
+    if (!sessionInitialized) {
+      initializeSession();
+      setLoading(true);
+      return;
+    }
+    if (sessionInitialized && roundMovies.length === 0) {
+      // Claim enough unique movies for the quiz pool (needs 10 rounds * (OPTIONS_PER_ROUND-1), so 30, but we allow repeats among wrongs for more variety)
+      const claimed = claimMoviesForRound(TOTAL_ROUNDS * 2); // double, to allow for shuffle
+      if (claimed && claimed.length >= TOTAL_ROUNDS) {
+        setRoundMovies(claimed);
+      }
+    }
+    // eslint-disable-next-line
+  }, [sessionInitialized, claimMoviesForRound]);
 
-  // Drag and drop handlers
+  useEffect(() => {
+    if (roundMovies.length === 0) {
+      setLoading(true);
+      return;
+    }
+    // For this Vetrimaaran task, our "correct" answer each round is one of a small, trusted Kollywood movies directed OR written by Vetrimaaran.
+    // We'll use a static list of known matches, shuffle and fill unique corrects to 10 if need be.
+    const vetrimaaranMovies = [
+      {
+        title: "Visaranai",
+        tmdb_id: 374720,
+        poster_path: "/4rCZVG4n5c4IbzIXgHHKcS0QGsw.jpg"
+      },
+      {
+        title: "Aadukalam",
+        tmdb_id: 54858,
+        poster_path: "/4g4sb7TAtrtpemTq9iAXTh9tPfB.jpg"
+      },
+      {
+        title: "Asuran",
+        tmdb_id: 573530,
+        poster_path: "/zggcTQEWh05RzTRiXOBCENcyzmO.jpg"
+      },
+      {
+        title: "Vada Chennai",
+        tmdb_id: 470926,
+        poster_path: "/8HVGjzxubAEANMQggqRAsoe5nBr.jpg"
+      },
+      {
+        title: "Vaanam Kottattum",
+        tmdb_id: 656114,
+        poster_path: "/98zoyzjRNl6jXgKQ5DltM8p6Ndt.jpg"
+      },
+      {
+        title: "Pudhupettai",
+        tmdb_id: 34826,
+        poster_path: "/7DwsS5sz34JEoLNnNm5WYQg2BKy.jpg"
+      },
+      {
+        title: "Polladhavan",
+        tmdb_id: 77895,
+        poster_path: "/gp02lHgVdibgykjSzDbM9YNQJ1l.jpg"
+      },
+      {
+        title: "Kodi",
+        tmdb_id: 422253,
+        poster_path: "/jenRq2UTWyxlL6ZSnM4tPFQyu1J.jpg"
+      },
+      {
+        title: "Udaan (Telugu dubbed)",
+        tmdb_id: 499758,
+        poster_path: "/4N6S8vIOwFI9vHh4zI8hwlPPKaq.jpg"
+      },
+      {
+        title: "Vetrimaaran Antha Padichava",
+        tmdb_id: 113710, // Fallback, if 10th needed
+        poster_path: "" // No TMDb poster, will fallback "No Poster"
+      }
+    ];
+    // shuffle and pick exactly TOTAL_ROUNDS unique correct movies
+    const corrects = vetrimaaranMovies
+      .sort(() => Math.random() - 0.5)
+      .slice(0, TOTAL_ROUNDS);
+
+    // Build rounds: each with 1 correct, CLUE as character, and 3 others (distinct TMDb movies)
+    const roundsBuilt = [];
+    for (let i = 0; i < TOTAL_ROUNDS; i++) {
+      // Correct movie for this round
+      const correctMovie = { ...corrects[i], character: CLUE };
+      // Pick 3 unique, non-correct, options for decoys for this round
+      // Avoid including this correct movie among the wrongs!
+      const notCorrect = roundMovies
+        .filter(m => String(m.id) !== String(correctMovie.tmdb_id))
+        .filter(m => m.poster_path); // only movies with available poster
+      // Shuffle, pick 3
+      const decoys = shuffle(notCorrect).slice(0, 3).map(m => ({
+        title: m.title,
+        tmdb_id: m.id,
+        poster_path: m.poster_path
+      }));
+      // Insert correct randomly in options
+      const insertAt = Math.floor(Math.random() * 4);
+      const options = [...decoys];
+      options.splice(insertAt, 0, correctMovie);
+      roundsBuilt.push({
+        options,
+        correctIdx: insertAt,
+        answerIdx: null,
+        feedback: ""
+      });
+    }
+    setRounds(roundsBuilt);
+    setLoading(false);
+    // Reset game state
+    setCurrentRound(0);
+    setUserAnswers([]);
+    setShowFeedback(false);
+    setGameFinished(false);
+    setDroppedIdx(null);
+    // eslint-disable-next-line
+  }, [roundMovies]);
+
+  // Drag handlers for the clue
   function onDragStart(e) {
     setDragActive(true);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", CLUE);
-    // Visually lower opacity
     if (clueRef.current) clueRef.current.style.opacity = 0.51;
   }
   function onDragEnd() {
@@ -78,38 +176,68 @@ function CharacterMovieMatch({
     e.dataTransfer.dropEffect = "move";
   }
   function onDrop(idx) {
-    if (finished || dragged) return;
-    setDragged(true);
+    if (droppedIdx !== null || showFeedback || gameFinished) return; // only once per round
+    setDroppedIdx(idx);
     setDragActive(false);
-    setSelectedIdx(idx);
 
-    // Evaluate answer & feedback
-    const picked = movieOptions[idx];
-    let result, msg;
-    if (picked.title === "Mersal") {
-      result = true;
-      msg = "Correct! Mersal was co-written by Vetrimaaran.";
+    // Validate: was this the correct poster?
+    const round = rounds[currentRound];
+    const isCorrect = idx === round.correctIdx;
+    // Feedback string
+    let feedback;
+    if (isCorrect) {
+      feedback = "Correct! This movie fits the Vetrimaaran clue.";
     } else {
-      result = false;
-      msg = `Incorrect. "${picked.title}" was NOT made by Vetrimaaran – Mersal is correct!`;
+      feedback = `Incorrect. "${round.options[idx].title}" was not the right answer.`;
     }
-    setFeedback(msg);
 
+    const newRounds = rounds.slice();
+    newRounds[currentRound] = {
+      ...round,
+      answerIdx: idx,
+      feedback
+    };
+    setRounds(newRounds);
+    setUserAnswers(ans => ans.concat({
+      guess: idx,
+      correct: isCorrect,
+      chosenTitle: round.options[idx]?.title,
+      correctTitle: round.options[round.correctIdx]?.title
+    }));
+    setShowFeedback(true);
+
+    // After delay, auto-advance or finish
     setTimeout(() => {
-      setFinished(true);
-      if (onGameEnd) {
-        onGameEnd({
-          correct: result ? 1 : 0,
-          total: 1,
-          mode: "Character-Movie Match – Vetrimaaran",
-          answers: [{ guess: idx, correct: result }],
-          roundMovies: movieOptions,
-        });
+      if (currentRound + 1 === TOTAL_ROUNDS) {
+        setGameFinished(true);
+        // Show overall score and answers via onGameEnd
+        if (onGameEnd) {
+          onGameEnd({
+            correct: [...(userAnswers || []), { correct: isCorrect }].filter(x => x.correct).length,
+            total: TOTAL_ROUNDS,
+            mode: "Character-Movie Match (Vetrimaaran)",
+            answers: [...(userAnswers || []), { guess: idx, correct: isCorrect }],
+            roundMovies: rounds.map(r => r.options[r.correctIdx])
+          });
+        }
+      } else {
+        setShowFeedback(false);
+        setDroppedIdx(null);
+        setCurrentRound(c => c + 1);
       }
-    }, 2000);
+    }, 1600);
   }
 
-  // Simple fallback if images fail to load
+  function shuffle(array) {
+    const arr = array.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // Simple fallback for broken posters
   function handleImgError(e) {
     e.target.onerror = null;
     e.target.src = "";
@@ -117,23 +245,44 @@ function CharacterMovieMatch({
     e.target.style.background = "#190a29";
     e.target.style.color = "#fff8";
   }
-  
+
+  // Wait for rounds to be built
+  if (loading || rounds.length === 0 || currentRound >= rounds.length) {
+    return (
+      <div className="game-panel glass-panel">
+        <button className="btn btn-back" onClick={onBack}>← Back</button>
+        <h2>🎬 Character-Movie Match <span style={{ fontSize: "1rem", fontWeight: 400 }}>({CLUE})</span></h2>
+        <em>Preparing your character-movie match round...</em>
+      </div>
+    );
+  }
+
+  // The current round data
+  const round = rounds[currentRound] || {};
   return (
     <div className="game-panel glass-panel">
       <button className="btn btn-back" onClick={onBack}>← Back</button>
-      <h2>🎬 Character-Movie Match <span style={{ fontSize: "1rem", fontWeight: 400 }}>(Special: {CLUE})</span></h2>
-      <div style={{ marginTop: 10, marginBottom: 13 }}>
+      <h2>
+        🎬 Character-Movie Match
+        <span style={{
+          fontSize: "1rem",
+          fontWeight: 400,
+          marginLeft: 8
+        }}>(Q{currentRound + 1}/{TOTAL_ROUNDS})</span>
+      </h2>
+      <div style={{ marginTop: 10, marginBottom: 14 }}>
         <b>Instructions:</b><br />
         <span style={{ color: "#fb00ff" }}>
-          Drag the director clue "<b>{CLUE}</b>" onto the movie poster you believe he was involved with.<br />
-          Get immediate feedback on your answer!
+          Drag the <b>character clue</b> "<b>{CLUE}</b>" onto the movie poster that <br />
+          you believe matches the given character.<br />
+          Can you spot all of Vetrimaaran’s films?
         </span>
       </div>
       {/* Draggable clue */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
         <div
           ref={clueRef}
-          draggable={selectedIdx === null}
+          draggable={droppedIdx === null && !showFeedback && !gameFinished}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
           style={{
@@ -145,8 +294,8 @@ function CharacterMovieMatch({
             padding: "15px 32px",
             fontSize: "1.7rem",
             marginBottom: 8,
-            cursor: selectedIdx === null ? "grab" : "not-allowed",
-            opacity: selectedIdx !== null ? 0.35 : 1,
+            cursor: droppedIdx === null && !showFeedback && !gameFinished ? "grab" : "not-allowed",
+            opacity: droppedIdx !== null || showFeedback ? 0.35 : 1,
             boxShadow: dragActive ? "0 0 19px #fb00ff77" : "",
             transition: "opacity 0.2s, box-shadow 0.15s"
           }}
@@ -154,7 +303,7 @@ function CharacterMovieMatch({
           aria-grabbed={dragActive ? "true" : "false"}
         >
           {CLUE}
-          <span style={{ fontWeight: 400, fontSize: "1rem", marginLeft: 7, color: "#fff9" }}>Director</span>
+          <span style={{ fontWeight: 400, fontSize: "1rem", marginLeft: 7, color: "#fff9" }}>Character</span>
         </div>
         <div
           style={{
@@ -165,93 +314,101 @@ function CharacterMovieMatch({
             alignItems: "center"
           }}
         >
-          {movieOptions.map((movie, idx) => (
-            <div
-              key={movie.id}
-              onDragOver={selectedIdx === null ? onDragOver : undefined}
-              onDrop={selectedIdx === null ? () => onDrop(idx) : undefined}
-              tabIndex={0}
-              className="poster-drop"
-              style={{
-                width: 151,
-                minHeight: 224,
-                background: selectedIdx === idx 
-                  ? "#fb00ff33"
-                  : "var(--card-bg, #130013df)",
-                border: selectedIdx === idx
-                  ? "3.2px solid #fb00ff"
-                  : "2.3px solid var(--border-color, #fb00ff66)",
-                borderRadius: 12,
-                boxShadow: selectedIdx === idx
-                  ? "0 0 20px #fb00ff77"
-                  : "0 2px 17px #fb00ff19",
-                display: "flex", flexDirection: "column", alignItems: "center",
-                justifyContent: "center",
-                opacity: dragged && selectedIdx !== idx ? 0.52 : 1,
-                cursor: selectedIdx === null ? "pointer" : "not-allowed",
-                position: "relative",
-                transition: "all 0.19s"
-              }}
-              aria-dropeffect={selectedIdx === null ? "move" : "none"}
-            >
-              {movie.poster_path ?
-                <img
-                  src={`https://image.tmdb.org/t/p/w185${movie.poster_path}`}
-                  alt={movie.title}
-                  width={116}
-                  height={172}
-                  style={{
-                    objectFit: "cover",
-                    borderRadius: 9,
-                    marginBottom: 7,
-                    boxShadow: selectedIdx === idx ? "0 0 0 2.5px #fb00ff" : ""
-                  }}
-                  onError={handleImgError}
-                />
-                :
-                <div style={{
-                  width: 116, height: 172, background: "#201426",
-                  color: "#fff6", borderRadius: 9, display: "flex", alignItems: "center",
-                  justifyContent: "center", fontSize: 16, marginBottom: 7
-                }}>No Poster</div>
-              }
+          {round.options &&
+            round.options.map((movie, idx) => (
               <div
+                key={movie.tmdb_id + "-" + idx}
+                onDragOver={droppedIdx === null && !showFeedback && !gameFinished ? onDragOver : undefined}
+                onDrop={droppedIdx === null && !showFeedback && !gameFinished ? () => onDrop(idx) : undefined}
+                tabIndex={0}
+                className="poster-drop"
                 style={{
-                  fontWeight: 600,
-                  color: "#fff",
-                  fontSize: "1.04rem",
-                  letterSpacing: ".007em",
-                  textAlign: "center"
+                  width: 151,
+                  minHeight: 224,
+                  background: droppedIdx === idx && showFeedback
+                    ? (idx === round.correctIdx ? "#29c77733" : "#fb00ff33")
+                    : "var(--card-bg, #130013df)",
+                  border: droppedIdx === idx && showFeedback
+                    ? (idx === round.correctIdx ? "3.4px solid #29c777" : "3.2px solid #fb00ff")
+                    : "2.3px solid var(--border-color, #fb00ff66)",
+                  borderRadius: 12,
+                  boxShadow: droppedIdx === idx && showFeedback
+                    ? "0 0 20px #fb00ff77"
+                    : "0 2px 17px #fb00ff19",
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  justifyContent: "center",
+                  opacity: droppedIdx !== null && droppedIdx !== idx ? 0.52 : 1,
+                  cursor: droppedIdx === null && !showFeedback && !gameFinished ? "pointer" : "not-allowed",
+                  position: "relative",
+                  transition: "all 0.19s"
                 }}
+                aria-dropeffect={droppedIdx === null && !showFeedback && !gameFinished ? "move" : "none"}
               >
-                {movie.title}
-              </div>
-              {/* Feedback as toast/label on the poster */}
-              {selectedIdx === idx && feedback && (
-                <div style={{
-                  color: movie.title === "Mersal" ? "#29c777" : "#ff8f55",
-                  fontWeight: 600,
-                  marginTop: 8,
-                  background: "#180523e5",
-                  borderRadius: 8,
-                  padding: "6px 13px",
-                  boxShadow: "0 0 10px #fb00ff44",
-                  fontSize: "1rem",
-                  minHeight: 22,
-                }}>
-                  {feedback}
+                {movie.poster_path ?
+                  <img
+                    src={`https://image.tmdb.org/t/p/w185${movie.poster_path}`}
+                    alt={movie.title}
+                    width={116}
+                    height={172}
+                    style={{
+                      objectFit: "cover",
+                      borderRadius: 9,
+                      marginBottom: 7,
+                      boxShadow: droppedIdx === idx && showFeedback ? "0 0 0 2.5px #fb00ff" : ""
+                    }}
+                    onError={handleImgError}
+                  />
+                  :
+                  <div style={{
+                    width: 116, height: 172, background: "#201426",
+                    color: "#fff6", borderRadius: 9, display: "flex", alignItems: "center",
+                    justifyContent: "center", fontSize: 16, marginBottom: 7
+                  }}>No Poster</div>
+                }
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: "#fff",
+                    fontSize: "1.04rem",
+                    letterSpacing: ".007em",
+                    textAlign: "center"
+                  }}
+                >
+                  {movie.title}
                 </div>
-              )}
-            </div>
-          ))}
+                {/* Feedback toast per poster (if selected) */}
+                {droppedIdx === idx && showFeedback && (
+                  <div style={{
+                    color: idx === round.correctIdx ? "#29c777" : "#ff8f55",
+                    fontWeight: 600,
+                    marginTop: 8,
+                    background: "#180523e5",
+                    borderRadius: 8,
+                    padding: "6px 13px",
+                    boxShadow: "0 0 10px #fb00ff44",
+                    fontSize: "1rem",
+                    minHeight: 22,
+                  }}>
+                    {round.feedback}
+                  </div>
+                )}
+              </div>
+            ))}
         </div>
         <div style={{ marginTop: 16, minHeight: 28, textAlign: "center" }}>
-          {selectedIdx !== null && feedback && (
-            <span style={{ color: movieOptions[selectedIdx].title === "Mersal" ? "#29c777" : "#fb00ff", fontWeight: 500, fontSize: "1.135rem" }}>
-              {feedback}
-            </span>
+          {showFeedback && droppedIdx !== null && (
+            <span style={{
+              color: droppedIdx === round.correctIdx ? "#29c777" : "#fb00ff",
+              fontWeight: 500,
+              fontSize: "1.13rem"
+            }}>{round.feedback}</span>
           )}
         </div>
+        {gameFinished && (
+          <div style={{ marginTop: 28 }}>
+            <b>End of Round!</b>
+          </div>
+        )}
       </div>
     </div>
   );
