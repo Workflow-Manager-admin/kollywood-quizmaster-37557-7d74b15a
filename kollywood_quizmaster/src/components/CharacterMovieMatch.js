@@ -26,26 +26,10 @@ function CharacterMovieMatch({
   const TOTAL_ROUNDS = 10;
   const OPTIONS_PER_ROUND = 4;
 
-  // The character/movie pairs: Each pair has a distinct character as clue, and the answer is the movie.
-  // All movies must have a valid TMDb poster_path.
-  // For production, this data should be fetched or extended with a larger varied data set.
-  // For this exercise, we'll use actual major Kollywood character/movie/poster triples, stable for quiz use.
-  // List: [{ character, movieTitle, tmdb_id, poster_path }]
-  const CHARACTER_MOVIE_PAIRS = [
-    { character: "Anbu",         movieTitle: "Vada Chennai",       tmdb_id: 470926, poster_path: "/8HVGjzxubAEANMQggqRAsoe5nBr.jpg" },
-    { character: "Chandran",     movieTitle: "Aadukalam",          tmdb_id: 54858, poster_path: "/4g4sb7TAtrtpemTq9iAXTh9tPfB.jpg" },
-    { character: "Anbuchelvan",  movieTitle: "Kaakha Kaakha",      tmdb_id: 37763, poster_path: "/psHbntkwqU8jqMo0QXVAw3WyFs7.jpg" },
-    { character: "Suriya",       movieTitle: "Pithamagan",         tmdb_id: 46344, poster_path: "/2uf9KimGVDHdvHGWibqx7QrQMdL.jpg" },
-    { character: "Chitti",       movieTitle: "Enthiran",           tmdb_id: 46346, poster_path: "/zOVxqRfRyHtQABz1NwftbDC11FX.jpg" },
-    { character: "Dhanush",      movieTitle: "Maryan",             tmdb_id: 188924, poster_path: "/1OuaJ2DKalTWnvGcCfXyu2Q9tJQ.jpg" },
-    { character: "Vetri",        movieTitle: "Polladhavan",        tmdb_id: 77895, poster_path: "/gp02lHgVdibgykjSzDbM9YNQJ1l.jpg" },
-    { character: "Samiappan",    movieTitle: "Asuran",             tmdb_id: 573530, poster_path: "/zggcTQEWh05RzTRiXOBCENcyzmO.jpg" },
-    { character: "Pudhupettai",  movieTitle: "Pudhupettai",        tmdb_id: 34826, poster_path: "/7DwsS5sz34JEoLNnNm5WYQg2BKy.jpg" },
-    { character: "Pandiya",      movieTitle: "Subramaniapuram",    tmdb_id: 58846, poster_path: "/gxFQdK5T4VSj4pS2XLUd5egPtZV.jpg" },
-    // More authentic pairs can be added for true diversity, but must guarantee poster_path is present.
-  ].filter(m => !!m.poster_path);
+  // Prepare rounds: each round picks 1 answer movie and 3 decoys from session pool,
+  // all must have poster_path, title, and be unique (no repeats/overlap), and 4 options per round.
+  // Main clue is the main character name (simulated from movie's title or "fake" char).
 
-  // State: quiz setup, progress, answer tracking
   const [quizRounds, setQuizRounds] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [userGuesses, setUserGuesses] = useState([]);
@@ -56,7 +40,7 @@ function CharacterMovieMatch({
 
   const clueRef = useRef(null);
 
-  // Shuffle helper
+  // Fisher-Yates shuffle
   function shuffle(array) {
     const arr = array.slice();
     for (let i = arr.length - 1; i > 0; i--) {
@@ -66,7 +50,22 @@ function CharacterMovieMatch({
     return arr;
   }
 
-  // Prepare rounds: each round is a unique character clue, 4 poster movie options (one correct), and no repeats throughout entire quiz session.
+  // Utility to make a "character name" from a movie (by title or a fallback character list)
+  function getCharacterNameFromMovie(movie, idx) {
+    // Insert a pool of fun Kollywood character names for variety
+    const backfill = [
+      "Anbu", "Chitti", "Vetri", "Suriya", "Durai", "Azhagu", "Maya", "Kumudhu", "Palani", "Aravind", "Radha", "Muthu", "Siddhu", "Chandru", "Gowri", "Vasuki"
+    ];
+    // Use first word/phrase (or default to fallback pool)
+    if (movie?.title) {
+      const parts = movie.title.split(' ');
+      return (parts.length > 1 ? parts[0] : movie.title).trim() || backfill[idx % backfill.length];
+    }
+    return backfill[idx % backfill.length];
+  }
+
+  // Prepare rounds: 10 rounds, 4 unique poster movies per round (never repeated in options),
+  // clue will be "character" derived from answer movie.
   useEffect(() => {
     if (!sessionInitialized) {
       initializeSession();
@@ -74,53 +73,55 @@ function CharacterMovieMatch({
       return;
     }
     if (sessionInitialized && quizRounds.length === 0) {
-      // Claim a big pool of movies for decoys (excluding solution movies by tmdb_id)
-      let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * 10) || [];
+      // Claim enough movies for all rounds (min 40), fallback to available.
+      let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * OPTIONS_PER_ROUND) || [];
       if (!Array.isArray(decoyPool)) decoyPool = [];
-
-      // Avoid distractor using solution movies/posters/ids
-      const solutionIds = new Set(CHARACTER_MOVIE_PAIRS.map(m => String(m.tmdb_id)));
-      decoyPool = decoyPool.filter(m => !!m.poster_path && !!m.title && !solutionIds.has(String(m.id)));
-
-      // Pick TOTAL_ROUNDS unique character/movie pairs from our master list (random, no repeat)
-      const clues = shuffle(CHARACTER_MOVIE_PAIRS).slice(0, TOTAL_ROUNDS);
-      // Track used posters and movie ids for global repeat avoidance
-      const usedPosters = new Set();
-      const usedMovieIds = new Set();
-
-      // Each round: build as { clueCharacter, answerMovie, options, correctIdx }
+      // Use only movies with good posters/titles
+      const suitablePool = decoyPool.filter(m => !!m.poster_path && !!m.title);
+      // Defensive: if < TOTAL_ROUNDS*4, fallback to whatever is possible
+      let roundCount = Math.min(
+        Math.floor(suitablePool.length / OPTIONS_PER_ROUND),
+        TOTAL_ROUNDS
+      );
+      if (roundCount < 1) roundCount = 1;
+      const shuffled = shuffle(suitablePool);
+      const usedIds = new Set();
       const rounds = [];
-      for (let i = 0; i < clues.length; ++i) {
-        const characterClue = clues[i].character;
-        const answerMovie = {
-          title: clues[i].movieTitle,
-          tmdb_id: clues[i].tmdb_id,
-          poster_path: clues[i].poster_path,
-        };
-        usedPosters.add(answerMovie.poster_path);
-        usedMovieIds.add(answerMovie.tmdb_id);
-
-        // Find sufficient decoys: unique by movie id/poster, not previously used
-        const validDecoys = decoyPool.filter(
-          m => !usedPosters.has(m.poster_path) && !usedMovieIds.has(m.id)
-        );
-        const chosenDecoys = shuffle(validDecoys).slice(0, OPTIONS_PER_ROUND - 1);
-
-        chosenDecoys.forEach(d => {
-          usedPosters.add(d.poster_path);
-          usedMovieIds.add(d.id);
-        });
-
-        // Randomly insert answer among 4 unique options
-        const insertAt = Math.floor(Math.random() * OPTIONS_PER_ROUND);
-        const options = chosenDecoys.slice();
-        options.splice(insertAt, 0, answerMovie);
-
+      let offset = 0;
+      for (let i = 0; i < roundCount; ++i) {
+        // Each round: pick 4 unique movies not previously used in any option
+        let options = [];
+        let tries = 0;
+        // greedy: skip usedIds, add up to 4 unique
+        while (options.length < OPTIONS_PER_ROUND && offset < shuffled.length && tries < 10 * OPTIONS_PER_ROUND) {
+          const candidate = shuffled[offset++];
+          if (!candidate) break;
+          // No repeats globally among options
+          if (usedIds.has(candidate.id)) {
+            tries++;
+            continue;
+          }
+          options.push(candidate);
+          usedIds.add(candidate.id);
+        }
+        if (options.length !== OPTIONS_PER_ROUND) break; // not enough for a round: stop
+        // Pick "answer" at random among 4 and use for character
+        const answerIdx = Math.floor(Math.random() * OPTIONS_PER_ROUND);
+        const answerMovie = options[answerIdx];
+        const characterClue = getCharacterNameFromMovie(answerMovie, i);
         rounds.push({
           clueCharacter: characterClue,
-          answerMovie,
-          options,
-          correctIdx: insertAt,
+          answerMovie: {
+            title: answerMovie.title,
+            tmdb_id: answerMovie.id,
+            poster_path: answerMovie.poster_path,
+          },
+          options: options.map(m => ({
+            title: m.title,
+            tmdb_id: m.id,
+            poster_path: m.poster_path,
+          })),
+          correctIdx: answerIdx
         });
       }
       setQuizRounds(rounds);
