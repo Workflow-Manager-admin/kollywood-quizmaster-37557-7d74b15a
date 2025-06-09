@@ -332,78 +332,116 @@ function CharacterMovieMatch({
             alignItems: "center"
           }}
         >
-          {round.options.map((movie, idx) => (
-            <div
-              key={movie.tmdb_id + "-" + idx}
-              onDragOver={droppedIdx === null && !showFeedback ? onDragOver : undefined}
-              onDrop={droppedIdx === null && !showFeedback ? () => handleDrop(idx) : undefined}
-              tabIndex={0}
-              className="poster-drop"
-              style={{
-                width: 151,
-                minHeight: 224,
-                background: droppedIdx === idx && showFeedback
-                  ? (idx === round.correctIdx ? "#29c77733" : "#fb00ff33")
-                  : "var(--card-bg, #130013df)",
-                border: droppedIdx === idx && showFeedback
-                  ? (idx === round.correctIdx ? "3.4px solid #29c777" : "3.2px solid #fb00ff")
-                  : "2.3px solid var(--border-color, #fb00ff66)",
-                borderRadius: 12,
-                boxShadow: droppedIdx === idx && showFeedback
-                  ? "0 0 20px #fb00ff77"
-                  : "0 2px 17px #fb00ff19",
-                display: "flex", flexDirection: "column", alignItems: "center",
-                justifyContent: "center",
-                opacity: droppedIdx !== null && droppedIdx !== idx ? 0.52 : 1,
-                cursor: droppedIdx === null && !showFeedback ? "pointer" : "not-allowed",
-                position: "relative",
-                transition: "all 0.19s"
-              }}
-              aria-dropeffect={droppedIdx === null && !showFeedback ? "move" : "none"}
-            >
-              {renderPoster(movie)}
+          {Array.isArray(round.options) &&
+            round.options.map((movie, idx) => (
               <div
+                key={`${movie && (movie.tmdb_id ?? idx)}`}
+                onDragOver={droppedIdx === null && !showFeedback ? onDragOver : undefined}
+                onDrop={droppedIdx === null && !showFeedback ? () => handleDrop(idx) : undefined}
+                tabIndex={0}
+                className="poster-drop"
                 style={{
-                  fontWeight: 600,
-                  color: "#fff",
-                  fontSize: "1.1rem",
-                  letterSpacing: ".007em",
-                  textAlign: "center"
+                  width: 151,
+                  minHeight: 224,
+                  background:
+                    droppedIdx === idx && showFeedback
+                      ? idx === round.correctIdx
+                        ? "#29c77733"
+                        : "#fb00ff33"
+                      : "var(--card-bg, #130013df)",
+                  border:
+                    droppedIdx === idx && showFeedback
+                      ? idx === round.correctIdx
+                        ? "3.4px solid #29c777"
+                        : "3.2px solid #fb00ff"
+                      : "2.3px solid var(--border-color, #fb00ff66)",
+                  borderRadius: 12,
+                  boxShadow:
+                    droppedIdx === idx && showFeedback
+                      ? "0 0 20px #fb00ff77"
+                      : "0 2px 17px #fb00ff19",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: droppedIdx !== null && droppedIdx !== idx ? 0.52 : 1,
+                  cursor: droppedIdx === null && !showFeedback ? "pointer" : "not-allowed",
+                  position: "relative",
+                  transition: "all 0.19s"
                 }}
+                aria-dropeffect={droppedIdx === null && !showFeedback ? "move" : "none"}
               >
-                {movie.title}
-              </div>
-              {droppedIdx === idx && showFeedback && (
-                <div style={{
-                  color: idx === round.correctIdx ? "#29c777" : "#ff8f55",
-                  fontWeight: 600,
-                  marginTop: 8,
-                  background: "#180523e5",
-                  borderRadius: 8,
-                  padding: "6px 13px",
-                  boxShadow: "0 0 10px #fb00ff44",
-                  fontSize: "1rem",
-                  minHeight: 22,
-                }}>
-                  {idx === round.correctIdx
-                    ? "Correct! This character is from the chosen movie."
-                    : `"${movie.title}" does NOT feature this character.`}
+                {/* Guard all movie property access */}
+                {movie ? renderPoster(movie) : (
+                  <div
+                    style={{
+                      width: 116,
+                      height: 172,
+                      background: "#201426",
+                      color: "#fff6",
+                      borderRadius: 9,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 16,
+                      marginBottom: 7
+                    }}
+                  >
+                    No Poster
+                  </div>
+                )}
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: "#fff",
+                    fontSize: "1.1rem",
+                    letterSpacing: ".007em",
+                    textAlign: "center"
+                  }}
+                >
+                  {movie && movie.title ? movie.title : <span style={{ color: "#fff4" }}>?</span>}
                 </div>
-              )}
-            </div>
-          ))}
+                {droppedIdx === idx && showFeedback && (
+                  <div
+                    style={{
+                      color: idx === round.correctIdx ? "#29c777" : "#ff8f55",
+                      fontWeight: 600,
+                      marginTop: 8,
+                      background: "#180523e5",
+                      borderRadius: 8,
+                      padding: "6px 13px",
+                      boxShadow: "0 0 10px #fb00ff44",
+                      fontSize: "1rem",
+                      minHeight: 22
+                    }}
+                  >
+                    {idx === round.correctIdx
+                      ? "Correct! This character is from the chosen movie."
+                      : `"${
+                          (movie && movie.title) ? movie.title : "Movie"
+                        }" does NOT feature this character.`}
+                  </div>
+                )}
+              </div>
+            ))}
         </div>
         {/* FEEDBACK Section */}
         <div style={{ marginTop: 16, minHeight: 28, textAlign: "center" }}>
           {showFeedback && droppedIdx !== null && (
-            <span style={{
-              color: droppedIdx === round.correctIdx ? "#29c777" : "#fb00ff",
-              fontWeight: 500,
-              fontSize: "1.13rem"
-            }}>
+            <span
+              style={{
+                color: droppedIdx === round.correctIdx ? "#29c777" : "#fb00ff",
+                fontWeight: 500,
+                fontSize: "1.13rem"
+              }}
+            >
               {droppedIdx === round.correctIdx
                 ? "Correct! Advancing to next..."
-                : `Oops! "${round.options[droppedIdx]?.title}" isn't correct.`}
+                : `Oops! "${
+                    (round.options && round.options[droppedIdx] && round.options[droppedIdx].title)
+                      ? round.options[droppedIdx].title
+                      : "Movie"
+                  }" isn't correct.`}
             </span>
           )}
         </div>
