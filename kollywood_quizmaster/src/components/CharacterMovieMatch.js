@@ -1,21 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./CharacterMovieMatch.css";
 
-// PUBLIC_INTERFACE
-/**
- * CharacterMovieMatch: 10 rounds with a unique character/movie clue and 4 unique, valid poster movie options (no repeats per session).
- * For each round: select a new clue, make distractors non-repeating, fetch only posters with valid images. 
- * Auto-advance after drag-drop; after round 10, show results summary.
- *
- * @param {{
- *   claimMoviesForRound: function,
- *   sessionInitialized: boolean,
- *   initializeSession: function,
- *   remainingCount: number,
- *   onGameEnd: function,
- *   onBack: function,
- * }} props
- */
+/*
+PUBLIC_INTERFACE
+CharacterMovieMatch: 10 rounds—each uses a distinct character name as clue, and the answer is the correct movie poster among 4 TMDb posters. Ensures no clue or option repeats, all posters reliable, and gives clear drag-and-drop instructions.
+
+@param {
+  claimMoviesForRound: function,
+  sessionInitialized: boolean,
+  initializeSession: function,
+  remainingCount: number,
+  onGameEnd: function,
+  onBack: function,
+} props
+*/
 function CharacterMovieMatch({
   claimMoviesForRound,
   sessionInitialized,
@@ -24,38 +22,41 @@ function CharacterMovieMatch({
   onGameEnd,
   onBack,
 }) {
-  // Constants for rounds and options
+  // TOTAL_ROUNDS - quiz rounds, each uses a distinct character.
   const TOTAL_ROUNDS = 10;
   const OPTIONS_PER_ROUND = 4;
-  // Using Vetrimaaran movies as clues -- can adapt for other directors or character lists
-  const CHARACTER = "Vetrimaaran";
 
-  // Hardcoded Vetrimaaran films with TMDb poster_path (no missing posters)
-  const CHARACTER_MOVIES = [
-    { title: "Visaranai", tmdb_id: 374720, poster_path: "/4rCZVG4n5c4IbzIXgHHKcS0QGsw.jpg" },
-    { title: "Aadukalam", tmdb_id: 54858, poster_path: "/4g4sb7TAtrtpemTq9iAXTh9tPfB.jpg" },
-    { title: "Asuran", tmdb_id: 573530, poster_path: "/zggcTQEWh05RzTRiXOBCENcyzmO.jpg" },
-    { title: "Vada Chennai", tmdb_id: 470926, poster_path: "/8HVGjzxubAEANMQggqRAsoe5nBr.jpg" },
-    { title: "Vaanam Kottattum", tmdb_id: 656114, poster_path: "/98zoyzjRNl6jXgKQ5DltM8p6Ndt.jpg" },
-    { title: "Pudhupettai", tmdb_id: 34826, poster_path: "/7DwsS5sz34JEoLNnNm5WYQg2BKy.jpg" },
-    { title: "Polladhavan", tmdb_id: 77895, poster_path: "/gp02lHgVdibgykjSzDbM9YNQJ1l.jpg" },
-    { title: "Kodi", tmdb_id: 422253, poster_path: "/jenRq2UTWyxlL6ZSnM4tPFQyu1J.jpg" },
-    { title: "Udaan (Telugu dubbed)", tmdb_id: 499758, poster_path: "/4N6S8vIOwFI9vHh4zI8hwlPPKaq.jpg" },
-    { title: "Visiri", tmdb_id: 593246, poster_path: "/U3tOgLGwawx9CUIELTSfKQnIus.jpg" },
+  // The character/movie pairs: Each pair has a distinct character as clue, and the answer is the movie.
+  // All movies must have a valid TMDb poster_path.
+  // For production, this data should be fetched or extended with a larger varied data set.
+  // For this exercise, we'll use actual major Kollywood character/movie/poster triples, stable for quiz use.
+  // List: [{ character, movieTitle, tmdb_id, poster_path }]
+  const CHARACTER_MOVIE_PAIRS = [
+    { character: "Anbu",         movieTitle: "Vada Chennai",       tmdb_id: 470926, poster_path: "/8HVGjzxubAEANMQggqRAsoe5nBr.jpg" },
+    { character: "Chandran",     movieTitle: "Aadukalam",          tmdb_id: 54858, poster_path: "/4g4sb7TAtrtpemTq9iAXTh9tPfB.jpg" },
+    { character: "Anbuchelvan",  movieTitle: "Kaakha Kaakha",      tmdb_id: 37763, poster_path: "/psHbntkwqU8jqMo0QXVAw3WyFs7.jpg" },
+    { character: "Suriya",       movieTitle: "Pithamagan",         tmdb_id: 46344, poster_path: "/2uf9KimGVDHdvHGWibqx7QrQMdL.jpg" },
+    { character: "Chitti",       movieTitle: "Enthiran",           tmdb_id: 46346, poster_path: "/zOVxqRfRyHtQABz1NwftbDC11FX.jpg" },
+    { character: "Dhanush",      movieTitle: "Maryan",             tmdb_id: 188924, poster_path: "/1OuaJ2DKalTWnvGcCfXyu2Q9tJQ.jpg" },
+    { character: "Vetri",        movieTitle: "Polladhavan",        tmdb_id: 77895, poster_path: "/gp02lHgVdibgykjSzDbM9YNQJ1l.jpg" },
+    { character: "Samiappan",    movieTitle: "Asuran",             tmdb_id: 573530, poster_path: "/zggcTQEWh05RzTRiXOBCENcyzmO.jpg" },
+    { character: "Pudhupettai",  movieTitle: "Pudhupettai",        tmdb_id: 34826, poster_path: "/7DwsS5sz34JEoLNnNm5WYQg2BKy.jpg" },
+    { character: "Pandiya",      movieTitle: "Subramaniapuram",    tmdb_id: 58846, poster_path: "/gxFQdK5T4VSj4pS2XLUd5egPtZV.jpg" },
+    // More authentic pairs can be added for true diversity, but must guarantee poster_path is present.
   ].filter(m => !!m.poster_path);
 
-  // State: quiz rounds structure, progress, answer tracking
+  // State: quiz setup, progress, answer tracking
   const [quizRounds, setQuizRounds] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [userGuesses, setUserGuesses] = useState([]); // one per round
-  const [droppedIdx, setDroppedIdx] = useState(null); // which option was dropped on in current round
+  const [userGuesses, setUserGuesses] = useState([]);
+  const [droppedIdx, setDroppedIdx] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const clueRef = useRef(null);
 
-  // Utility: shuffle array without mutating
+  // Shuffle helper
   function shuffle(array) {
     const arr = array.slice();
     for (let i = arr.length - 1; i > 0; i--) {
@@ -65,7 +66,7 @@ function CharacterMovieMatch({
     return arr;
   }
 
-  // Prepare quiz rounds: robustly ensure no repeated clues, options, or posters
+  // Prepare rounds: each round is a unique character clue, 4 poster movie options (one correct), and no repeats throughout entire quiz session.
   useEffect(() => {
     if (!sessionInitialized) {
       initializeSession();
@@ -73,51 +74,51 @@ function CharacterMovieMatch({
       return;
     }
     if (sessionInitialized && quizRounds.length === 0) {
-      // Get a large pool from the context for decoys (filter for poster, not character movie, valid title)
+      // Claim a big pool of movies for decoys (excluding solution movies by tmdb_id)
       let decoyPool = claimMoviesForRound(TOTAL_ROUNDS * 10) || [];
       if (!Array.isArray(decoyPool)) decoyPool = [];
-      // Exclude any movies in the CHARACTER_MOVIES by TMDb id
-      const characterIds = new Set(CHARACTER_MOVIES.map(m => String(m.tmdb_id)));
-      decoyPool = decoyPool.filter(m =>
-        !!m.poster_path && !characterIds.has(String(m.id)) && m.title
-      );
-      decoyPool = shuffle(decoyPool);
 
-      // Shuffle the clue movies for the current session
-      const availableClues = shuffle(CHARACTER_MOVIES).slice(0, TOTAL_ROUNDS);
-      // Set trackers for used posters & movie ids to avoid global repeats
+      // Avoid distractor using solution movies/posters/ids
+      const solutionIds = new Set(CHARACTER_MOVIE_PAIRS.map(m => String(m.tmdb_id)));
+      decoyPool = decoyPool.filter(m => !!m.poster_path && !!m.title && !solutionIds.has(String(m.id)));
+
+      // Pick TOTAL_ROUNDS unique character/movie pairs from our master list (random, no repeat)
+      const clues = shuffle(CHARACTER_MOVIE_PAIRS).slice(0, TOTAL_ROUNDS);
+      // Track used posters and movie ids for global repeat avoidance
       const usedPosters = new Set();
       const usedMovieIds = new Set();
 
-      // Build up rounds array: each round is { clueMovie, options, correctIdx }
+      // Each round: build as { clueCharacter, answerMovie, options, correctIdx }
       const rounds = [];
-      for (let i = 0; i < availableClues.length; ++i) {
-        const clueMovie = availableClues[i];
-        usedPosters.add(clueMovie.poster_path);
-        usedMovieIds.add(clueMovie.tmdb_id);
+      for (let i = 0; i < clues.length; ++i) {
+        const characterClue = clues[i].character;
+        const answerMovie = {
+          title: clues[i].movieTitle,
+          tmdb_id: clues[i].tmdb_id,
+          poster_path: clues[i].poster_path,
+        };
+        usedPosters.add(answerMovie.poster_path);
+        usedMovieIds.add(answerMovie.tmdb_id);
 
-        // Find 3 distractors that haven't been used as poster or movie before
+        // Find sufficient decoys: unique by movie id/poster, not previously used
         const validDecoys = decoyPool.filter(
           m => !usedPosters.has(m.poster_path) && !usedMovieIds.has(m.id)
         );
-
         const chosenDecoys = shuffle(validDecoys).slice(0, OPTIONS_PER_ROUND - 1);
+
         chosenDecoys.forEach(d => {
           usedPosters.add(d.poster_path);
           usedMovieIds.add(d.id);
         });
 
-        // Correct option inserted at a random position
+        // Randomly insert answer among 4 unique options
         const insertAt = Math.floor(Math.random() * OPTIONS_PER_ROUND);
         const options = chosenDecoys.slice();
-        options.splice(insertAt, 0, {
-          title: clueMovie.title,
-          tmdb_id: clueMovie.tmdb_id,
-          poster_path: clueMovie.poster_path,
-        });
+        options.splice(insertAt, 0, answerMovie);
 
         rounds.push({
-          clueMovie,
+          clueCharacter: characterClue,
+          answerMovie,
           options,
           correctIdx: insertAt,
         });
@@ -136,7 +137,7 @@ function CharacterMovieMatch({
   function onDragStart(e) {
     setDragActive(true);
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", CHARACTER);
+    e.dataTransfer.setData("text/plain", "kollywood-character");
     if (clueRef.current) clueRef.current.style.opacity = 0.51;
   }
   function onDragEnd() {
@@ -169,9 +170,8 @@ function CharacterMovieMatch({
     // Auto-advance or finish after short delay
     setTimeout(() => {
       if (currentIdx + 1 === quizRounds.length) {
-        // End of game, show results summary screen immediately
         if (onGameEnd) {
-          const correctCount =
+          const correctCount = 
             [...userGuesses, { correct: isCorrect }].filter(ans => ans.correct).length;
           onGameEnd({
             correct: correctCount,
@@ -198,11 +198,11 @@ function CharacterMovieMatch({
     }, 1150);
   }
 
-  // Poster rendering: show image or fallback on error
+  // Poster rendering: always show image or fallback
   function renderPoster(movie) {
     return movie.poster_path ? (
       <img
-        src={`https://image.tmdb.org/t/p/w185${movie.poster_path}`}
+        src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
         alt={movie.title}
         width={116}
         height={172}
@@ -247,7 +247,7 @@ function CharacterMovieMatch({
     );
   }
 
-  // Loader for preparation/unavailable state
+  // Loader for preparation
   if (
     loading ||
     !Array.isArray(quizRounds) ||
@@ -257,8 +257,10 @@ function CharacterMovieMatch({
   ) {
     return (
       <div className="game-panel glass-panel">
-        <button className="btn btn-back" onClick={onBack}>← Back</button>
-        <h2>🎬 Character-Movie Match <span style={{ fontSize: "1rem", fontWeight: 400 }}>({CHARACTER})</span></h2>
+        <button className="btn btn-back" onClick={onBack}>
+          ← Back
+        </button>
+        <h2>🎬 Character-Movie Match</h2>
         <em>Preparing your character-movie match round...</em>
       </div>
     );
@@ -268,7 +270,9 @@ function CharacterMovieMatch({
   const round = quizRounds[currentIdx];
   return (
     <div className="game-panel glass-panel">
-      <button className="btn btn-back" onClick={onBack}>← Back</button>
+      <button className="btn btn-back" onClick={onBack}>
+        ← Back
+      </button>
       <h2>
         🎬 Character-Movie Match
         <span style={{
@@ -278,18 +282,16 @@ function CharacterMovieMatch({
         }}>(Q{currentIdx + 1}/{quizRounds.length})</span>
       </h2>
       <div style={{ marginTop: 10, marginBottom: 14 }}>
-        <b>Instructions:</b><br />
-        <span style={{ color: "#fb00ff" }}>
-          Drag the <b>character clue</b> "<b>{CHARACTER}</b>" onto the movie poster that
-          <br />best matches the character/director.
+        <b>How to Play:</b>
+        <br />
+        <span style={{ color: "#fb00ff", fontWeight: 500 }}>
+          For each round, <u>drag the Character card</u> below onto the movie poster for the film that features the <b>given character</b> from Kollywood.
           <br />
-          <span style={{ fontSize: "0.98em", color: "#fff8" }}>
-            All clues are "Vetrimaaran" &mdash; select his film!
-          </span>
+          Only one poster per round is correct. Each character and movie is unique to that round.
         </span>
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
-        {/* DRAGGABLE CLUE */}
+        {/* DRAGGABLE CLUE (Character card) */}
         <div
           ref={clueRef}
           draggable={droppedIdx === null && !showFeedback}
@@ -302,23 +304,23 @@ function CharacterMovieMatch({
             fontWeight: 700,
             borderRadius: "14px",
             padding: "15px 32px",
-            fontSize: "1.7rem",
+            fontSize: "1.65rem",
             marginBottom: 8,
             cursor: droppedIdx === null && !showFeedback ? "grab" : "not-allowed",
-            opacity: droppedIdx !== null || showFeedback ? 0.35 : 1,
+            opacity: droppedIdx !== null || showFeedback ? 0.37 : 1,
             boxShadow: dragActive ? "0 0 19px #fb00ff77" : "",
             transition: "opacity 0.2s, box-shadow 0.15s"
           }}
           tabIndex={0}
           aria-grabbed={dragActive ? "true" : "false"}
         >
-          {CHARACTER}
+          <span role="img" aria-label="character">👤</span> {round.clueCharacter}
           <span style={{
             fontWeight: 400,
             fontSize: "1rem",
             marginLeft: 7,
             color: "#fff9"
-          }}>Character</span>
+          }}>– Character</span>
         </div>
         {/* POSTER OPTIONS GRID */}
         <div
@@ -384,8 +386,8 @@ function CharacterMovieMatch({
                   minHeight: 22,
                 }}>
                   {idx === round.correctIdx
-                    ? "Correct! This is a Vetrimaaran movie."
-                    : `"${movie.title}" is not a Vetrimaaran film.`}
+                    ? "Correct! This character is from the chosen movie."
+                    : `"${movie.title}" does NOT feature this character.`}
                 </div>
               )}
             </div>
@@ -401,7 +403,7 @@ function CharacterMovieMatch({
             }}>
               {droppedIdx === round.correctIdx
                 ? "Correct! Advancing to next..."
-                : `Nope! "${round.options[droppedIdx]?.title}" isn't correct.`}
+                : `Oops! "${round.options[droppedIdx]?.title}" isn't correct.`}
             </span>
           )}
         </div>
