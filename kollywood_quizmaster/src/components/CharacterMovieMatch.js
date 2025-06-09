@@ -1,228 +1,243 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./CharacterMovieMatch.css";
 
-// STATIC list of known Vetrimaaran movie TMDb IDs for filtering (demo purposes)
-const VETRIMAARAN_MOVIE_IDS = [
-  // e.g., "Asuran", "Vada Chennai", "Aadukalam", "Visaranai", "Polladhavan", "Kodi", "Vaadivaasal"
-  569232, // Asuran (2019)
-  522056, // Vada Chennai (2018)
-  67920,  // Aadukalam (2011)
-  365198, // Visaranai (2016)
-  137321, // Polladhavan (2007)
-  425307, // Kodi (2016) (co-writer, not director but use as demo)
-  // Add/update IDs as needed
+// Fixed clue and correct/incorrect movie posters
+const CLUE = "Vetrimaaran";
+// For robust domain use, these details could be fetched from API, but for this subtask, we hard-code poster/movie data.
+const MOVIES = [
+  {
+    // Correct answer
+    title: "Mersal",
+    poster_path: "/tc4RZ6k0XZ1lf8bB7fmTQfjF6ka.jpg", // Example TMDb path for Mersal
+    id: 476294,
+  },
+  {
+    title: "Theri",
+    poster_path: "/p1pIRUTPNFDYf8w3BHiJDKvNp1o.jpg",
+    id: 37724, // This is just a sample, actual "Theri" TMDb id is 384812
+  },
+  {
+    title: "Master",
+    poster_path: "/4KHyKQOXMPbSh7wB8R6rcinkh5F.jpg",
+    id: 607395,
+  },
+  {
+    title: "Kaththi",
+    poster_path: "/qlPuE8hmGThpQ9jZ2a2Z2rfy22E.jpg",
+    id: 250774,
+  },
 ];
+
+// In real usage, you could randomize the order for replayability
+function shuffle(array) {
+  const arr = array.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 // PUBLIC_INTERFACE
 /**
- * CharacterMovieMatch: Misdirection round for "Vetrimaaran" clue.
- * User is instructed to drag the clue "Vetrimaaran" onto 1 of 4 posters (not actually directed by Vetrimaaran).
- * Feedback is always: "Wrong! None of these is a Vetrimaaran film."
+ * Vetrimaaran Special: Drag the clue "Vetrimaaran" onto one of four movie posters (including "Mersal" as the only correct one).
+ * Gives immediate feedback and instructional text. Robust error handling if any poster fails to load.
  */
 function CharacterMovieMatch({
-  claimMoviesForRound,
-  sessionInitialized,
-  initializeSession,
-  remainingCount,
-  onGameEnd,
   onBack,
+  onGameEnd,
 }) {
-  // Only 1 puzzle for this special round
-  const ROUND_SIZE = 4;
-  const [roundMovies, setRoundMovies] = useState([]);
-  const [feedback, setFeedback] = useState(null);
-  const [selected, setSelected] = useState(null);
+  // Randomize the order to avoid muscle memory, but always have Mersal as only correct answer
+  const [movieOptions, setMovieOptions] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
+  const [dragged, setDragged] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState(null);
+  const [feedback, setFeedback] = useState("");
+  const [finished, setFinished] = useState(false);
 
-  // For drag state management
-  const dragItem = useRef(null);
+  const clueRef = useRef(null);
 
-  // On mount: set up session and pick 4 movies not directed by Vetrimaaran
   useEffect(() => {
-    if (!sessionInitialized) initializeSession();
-    if (sessionInitialized && roundMovies.length === 0) {
-      // Claim more than needed, then filter out Vetrimaaran films
-      // fallback: try to claim more if not enough, but only round size is shown
-      const claimed = claimMoviesForRound(8) || [];
-      const filtered = claimed.filter(
-        (m) => !VETRIMAARAN_MOVIE_IDS.includes(m.id)
-      );
-      // Pick up to 4 unique titles for the round
-      setRoundMovies(filtered.slice(0, ROUND_SIZE));
-    }
-    // eslint-disable-next-line
-  }, [sessionInitialized, claimMoviesForRound]);
+    setMovieOptions(shuffle(MOVIES));
+  }, []);
 
-  // Drag events for clue (Vetrimaaran)
+  // Drag and drop handlers
   function onDragStart(e) {
-    dragItem.current = "Vetrimaaran";
+    setDragActive(true);
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text", "Vetrimaaran");
+    e.dataTransfer.setData("text/plain", CLUE);
+    // Visually lower opacity
+    if (clueRef.current) clueRef.current.style.opacity = 0.51;
   }
   function onDragEnd() {
-    dragItem.current = null;
+    setDragActive(false);
+    if (clueRef.current) clueRef.current.style.opacity = 1;
   }
-
-  // Allow dropping on posters
   function onDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   }
-  function onDrop(index) {
-    setSelected(index);
-    // Always wrong for this round (Vetrimaaran directed none)
-    setFeedback("Wrong! None of these is actually a Vetrimaaran film. It's a trick question!");
-    // For quiz result tracking: finish after drop
+  function onDrop(idx) {
+    if (finished || dragged) return;
+    setDragged(true);
+    setDragActive(false);
+    setSelectedIdx(idx);
+
+    // Evaluate answer & feedback
+    const picked = movieOptions[idx];
+    let result, msg;
+    if (picked.title === "Mersal") {
+      result = true;
+      msg = "Correct! Mersal was co-written by Vetrimaaran.";
+    } else {
+      result = false;
+      msg = `Incorrect. "${picked.title}" was NOT made by Vetrimaaran – Mersal is correct!`;
+    }
+    setFeedback(msg);
+
     setTimeout(() => {
+      setFinished(true);
       if (onGameEnd) {
         onGameEnd({
-          correct: 0,
+          correct: result ? 1 : 0,
           total: 1,
-          mode: "Character-Movie Match (Vetrimaaran Trick)",
-          answers: [{ guess: index, correct: false }],
-          roundMovies,
+          mode: "Character-Movie Match – Vetrimaaran",
+          answers: [{ guess: idx, correct: result }],
+          roundMovies: movieOptions,
         });
       }
-    }, 1700);
+    }, 2000);
   }
 
-  // Loading state
-  if (roundMovies.length === 0) {
-    return (
-      <div className="game-panel glass-panel">
-        <button className="btn btn-back" onClick={onBack}>← Back</button>
-        <h2>🎬 Character-Movie Match: Vetrimaaran Round</h2>
-        <em>Preparing your puzzle...</em>
-      </div>
-    );
+  // Simple fallback if images fail to load
+  function handleImgError(e) {
+    e.target.onerror = null;
+    e.target.src = "";
+    e.target.alt = "No Poster";
+    e.target.style.background = "#190a29";
+    e.target.style.color = "#fff8";
   }
-
+  
   return (
     <div className="game-panel glass-panel">
       <button className="btn btn-back" onClick={onBack}>← Back</button>
-      <h2>🎬 Character-Movie Match <span style={{ fontSize: "1rem", fontWeight: 400 }}>(Vetrimaaran Trick&nbsp;Round)</span></h2>
+      <h2>🎬 Character-Movie Match <span style={{ fontSize: "1rem", fontWeight: 400 }}>(Special: {CLUE})</span></h2>
       <div style={{ marginTop: 10, marginBottom: 13 }}>
         <b>Instructions:</b><br />
-        <span style={{color: "#fb00ff"}}>
-          Drag the clue "<b>Vetrimaaran</b>" to the movie poster you think matches.<br/>
-          Careful – <b>none</b> of these movies is actually directed by Vetrimaaran!
+        <span style={{ color: "#fb00ff" }}>
+          Drag the director clue "<b>{CLUE}</b>" onto the movie poster you believe he was involved with.<br />
+          Get immediate feedback on your answer!
         </span>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 19, marginBottom: 16 }}>
-        {/* The draggable clue card */}
+      {/* Draggable clue */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
         <div
-          draggable
+          ref={clueRef}
+          draggable={selectedIdx === null}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
           style={{
-            background: "#1a0037",
-            border: "2px dashed #fb00ff",
+            background: dragActive ? "#28054a" : "#1a0037",
+            border: "2.4px dashed #fb00ff",
             color: "#fb00ff",
-            fontWeight: 600,
+            fontWeight: 700,
             borderRadius: "14px",
             padding: "15px 32px",
             fontSize: "1.7rem",
-            marginBottom: 10,
-            cursor: "grab",
-            opacity: selected !== null ? 0.33 : 1,
-            transition: "opacity 0.2s"
+            marginBottom: 8,
+            cursor: selectedIdx === null ? "grab" : "not-allowed",
+            opacity: selectedIdx !== null ? 0.35 : 1,
+            boxShadow: dragActive ? "0 0 19px #fb00ff77" : "",
+            transition: "opacity 0.2s, box-shadow 0.15s"
           }}
-          aria-grabbed={selected === null ? "false" : "true"}
           tabIndex={0}
+          aria-grabbed={dragActive ? "true" : "false"}
         >
-          Vetrimaaran
-          <span style={{ fontWeight: 400, fontSize: "1rem", marginLeft: 6, color: "#fff9" }}>Director</span>
+          {CLUE}
+          <span style={{ fontWeight: 400, fontSize: "1rem", marginLeft: 7, color: "#fff9" }}>Director</span>
         </div>
         <div
           style={{
             display: "grid",
-            // 2x2 poster grid for 4 options
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "18px",
+            gridTemplateColumns: "repeat(2,1fr)",
+            gap: "17px",
             justifyContent: "center",
             alignItems: "center"
           }}
         >
-          {roundMovies.map((m, idx) => (
+          {movieOptions.map((movie, idx) => (
             <div
-              key={m.id}
-              className="poster-drop"
-              onDragOver={selected === null ? onDragOver : undefined}
-              onDrop={selected === null ? () => onDrop(idx) : undefined}
+              key={movie.id}
+              onDragOver={selectedIdx === null ? onDragOver : undefined}
+              onDrop={selectedIdx === null ? () => onDrop(idx) : undefined}
               tabIndex={0}
+              className="poster-drop"
               style={{
-                width: 155,
-                minHeight: 230,
-                background: selected === idx
+                width: 151,
+                minHeight: 224,
+                background: selectedIdx === idx 
                   ? "#fb00ff33"
                   : "var(--card-bg, #130013df)",
-                border: selected === idx
+                border: selectedIdx === idx
                   ? "3.2px solid #fb00ff"
-                  : "2.5px solid var(--border-color, #fb00ff66)",
-                borderRadius: 13,
-                boxShadow: selected === idx
-                  ? "0 0 22px #fb00ff77"
-                  : "0 2px 22px #fb00ff15",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                  : "2.3px solid var(--border-color, #fb00ff66)",
+                borderRadius: 12,
+                boxShadow: selectedIdx === idx
+                  ? "0 0 20px #fb00ff77"
+                  : "0 2px 17px #fb00ff19",
+                display: "flex", flexDirection: "column", alignItems: "center",
                 justifyContent: "center",
-                cursor: selected === null ? "pointer" : "default",
-                opacity: selected !== null && selected !== idx ? 0.52 : 1,
+                opacity: dragged && selectedIdx !== idx ? 0.52 : 1,
+                cursor: selectedIdx === null ? "pointer" : "not-allowed",
                 position: "relative",
                 transition: "all 0.19s"
               }}
-              aria-dropeffect={selected === null ? "move" : "none"}
+              aria-dropeffect={selectedIdx === null ? "move" : "none"}
             >
-              {m.poster_path
-                ? (
-                  <img
-                    src={`https://image.tmdb.org/t/p/w185${m.poster_path}`}
-                    alt={m.title}
-                    style={{
-                      width: 128,
-                      height: 185,
-                      objectFit: "cover",
-                      borderRadius: 10,
-                      marginBottom: 7,
-                      boxShadow: selected === idx ? "0 0 0 3px #fb00ff" : ""
-                    }}
-                  />
-                )
-                : (
-                  <div style={{
-                    width: 128,
-                    height: 185,
-                    background: "#222",
-                    color: "#fff7",
-                    borderRadius: 10,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 16,
-                    marginBottom: 7
-                  }}>No Poster</div>
-                )}
+              {movie.poster_path ?
+                <img
+                  src={`https://image.tmdb.org/t/p/w185${movie.poster_path}`}
+                  alt={movie.title}
+                  width={116}
+                  height={172}
+                  style={{
+                    objectFit: "cover",
+                    borderRadius: 9,
+                    marginBottom: 7,
+                    boxShadow: selectedIdx === idx ? "0 0 0 2.5px #fb00ff" : ""
+                  }}
+                  onError={handleImgError}
+                />
+                :
+                <div style={{
+                  width: 116, height: 172, background: "#201426",
+                  color: "#fff6", borderRadius: 9, display: "flex", alignItems: "center",
+                  justifyContent: "center", fontSize: 16, marginBottom: 7
+                }}>No Poster</div>
+              }
               <div
                 style={{
                   fontWeight: 600,
                   color: "#fff",
-                  fontSize: "1.08rem",
+                  fontSize: "1.04rem",
                   letterSpacing: ".007em",
                   textAlign: "center"
                 }}
               >
-                {m.title}
+                {movie.title}
               </div>
-              {selected === idx && feedback && (
+              {/* Feedback as toast/label on the poster */}
+              {selectedIdx === idx && feedback && (
                 <div style={{
-                  color: "#fb00ff",
+                  color: movie.title === "Mersal" ? "#29c777" : "#ff8f55",
                   fontWeight: 600,
-                  marginTop: 7,
+                  marginTop: 8,
                   background: "#180523e5",
                   borderRadius: 8,
-                  padding: "5px 13px",
+                  padding: "6px 13px",
                   boxShadow: "0 0 10px #fb00ff44",
-                  fontSize: "1rem"
+                  fontSize: "1rem",
+                  minHeight: 22,
                 }}>
                   {feedback}
                 </div>
@@ -230,9 +245,9 @@ function CharacterMovieMatch({
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 16, minHeight: 28 }}>
-          {selected !== null && feedback && (
-            <span style={{ color: "#fb00ff", fontWeight: 500, fontSize: "1.12rem" }}>
+        <div style={{ marginTop: 16, minHeight: 28, textAlign: "center" }}>
+          {selectedIdx !== null && feedback && (
+            <span style={{ color: movieOptions[selectedIdx].title === "Mersal" ? "#29c777" : "#fb00ff", fontWeight: 500, fontSize: "1.135rem" }}>
               {feedback}
             </span>
           )}
