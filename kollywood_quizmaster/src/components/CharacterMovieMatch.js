@@ -169,7 +169,7 @@ function CharacterMovieMatch({
     // Auto-advance or finish after short delay
     setTimeout(() => {
       if (currentIdx + 1 === quizRounds.length) {
-        // End of game, show results
+        // End of game, show results summary screen immediately
         if (onGameEnd) {
           const correctCount =
             [...userGuesses, { correct: isCorrect }].filter(ans => ans.correct).length;
