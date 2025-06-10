@@ -9,7 +9,7 @@
 <i> [webpack-dev-server] 404s will fallback to '/index.html'
 Injecting EditorRootWrapper import: ../.ve/EditorRootWrapper
 asset bundle.js 1.33 MiB [emitted] (name: main) 1 related asset
-asset index.html 601 bytes [emitted]
+asset index.html 1.27 KiB [emitted]
 runtime modules 26.3 KiB 13 modules
 modules by path ./node_modules/ 1.2 MiB 29 modules
 modules by path ./src/ 34.6 KiB
@@ -25,32 +25,4 @@ modules by path ./.ve/ 15 KiB
     ./.ve/EditorOverlay.css 2.25 KiB [built] [code generated]
     ./node_modules/css-loader/dist/cjs.js!./.ve/EditorOverlay.css 1.15 KiB [built] [code generated]
   ./.ve/EditorOverlay.jsx 1.58 KiB [built] [code generated]
-
-ERROR in Template execution failed: ReferenceError: PUBLIC_URL is not defined
-
-ERROR in ReferenceError: PUBLIC_URL is not defined
-  
-  - index.html:14 
-    /home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/ko    llywood_quizmaster/public/index.html:14:11
-  
-  - index.html:25 module.exports
-    /home/kavia/workspace/code-generation/kollywood-quizmaster-37557-7d74b15a/ko    llywood_quizmaster/public/index.html:25:3
-  
-  - index.js:830 
-    [kollywood_quizmaster]/[html-webpack-plugin]/index.js:830:16
-  
-  - task_queues:95 process.processTicksAndRejections
-    node:internal/process/task_queues:95:5
-  
-  - async Promise.all
-
-webpack 5.99.9 compiled with 2 errors in 1761 ms
-assets by path *.js 1.33 MiB
-  asset bundle.js 1.33 MiB [emitted] (name: main) 1 related asset
-  asset main.7a7831706f1cdf56c308.hot-update.js 356 bytes [emitted] [immutable] [hmr] (name: main) 1 related asset
-asset index.html 1.27 KiB [emitted]
-asset main.7a7831706f1cdf56c308.hot-update.json 28 bytes [emitted] [immutable] [hmr]
-Entrypoint main 1.33 MiB (1.5 MiB) = bundle.js 1.33 MiB main.7a7831706f1cdf56c308.hot-update.js 356 bytes 2 auxiliary assets
-cached modules 1.25 MiB [cached] 41 modules
-runtime modules 26.3 KiB 13 modules
-webpack 5.99.9 compiled successfully in 215 ms
+webpack 5.99.9 compiled successfully in 1795 ms
