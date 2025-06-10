@@ -1,4 +1,10 @@
 import React, { useState } from "react";
+import BlurredPosterGuess from "./BlurredPosterGuess";
+import CharacterMovieMatch from "./CharacterMovieMatch";
+import MovieBingo from "./MovieBingo";
+import MovieTimelineChallenge from "./MovieTimelineChallenge";
+import SpinTheWheel from "./SpinTheWheel";
+import CastCombo from "./CastCombo";
 
 /**
  * Kollywood QuizMaster Main Container
@@ -14,7 +20,7 @@ import React, { useState } from "react";
  * PUBLIC_INTERFACE
  */
 
-/** Routing without dependencies: simple view state */
+//** Routing without dependencies: simple view state */
 const VIEW = {
   LOGIN: "login",
   HOME: "home",
@@ -78,6 +84,9 @@ const mainTheme = {
 };
 // ------------------------------------------
 
+/**
+ * PUBLIC_INTERFACE
+ */
 function MainContainer() {
   // Fake login: just user string in state
   const [user, setUser] = useState(null);
@@ -123,17 +132,17 @@ function MainContainer() {
           />
         );
       case VIEW.POSTER:
-        return <PosterGuessStub onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Blurred Poster Guess")} />;
+        return <BlurredPosterGuess onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Blurred Poster Guess")} />;
       case VIEW.CHARACTER:
-        return <CharacterMatchStub onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Character-Movie Match")} />;
+        return <CharacterMovieMatch onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Character-Movie Match")} />;
       case VIEW.BINGO:
-        return <MovieBingoStub onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Movie Bingo")} />;
+        return <MovieBingo onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Movie Bingo")} />;
       case VIEW.TIMELINE:
-        return <MovieTimelineStub onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Movie Timeline Challenge")} />;
+        return <MovieTimelineChallenge onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Movie Timeline Challenge")} />;
       case VIEW.SPIN:
-        return <SpinTheWheelStub onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Spin the Wheel")} />;
+        return <SpinTheWheel onBack={() => setView(VIEW.HOME)} onFinish={() => handleResultsStub("Spin the Wheel")} />;
       case VIEW.CAST:
-        return <CastComboStub onBack={() => setView(VIEW.HOME)} onReverseMode={() => setView(VIEW.REVERSE)} onFinish={() => handleResultsStub("Cast Combo")} />;
+        return <CastCombo onBack={() => setView(VIEW.HOME)} onReverseMode={() => setView(VIEW.REVERSE)} onFinish={() => handleResultsStub("Cast Combo")} />;
       case VIEW.REVERSE:
         // Bonus: Reverse mode for Cast Combo
         return <ReverseCastComboStub onBack={() => setView(VIEW.CAST)} onFinish={() => handleResultsStub("Reverse Mode")} />;
@@ -323,89 +332,7 @@ function GameModeCard({ mode, onPlay }) {
 }
 
 // PUBLIC_INTERFACE
-function PosterGuessStub({ onBack, onFinish }) {
-  return (
-    <GameStubContainer
-      title="Blurred Poster Guess"
-      desc="Guess the Kollywood movie from its blurred poster and two clues. (Game stub for now!)"
-      color="#fb00ff"
-      onBack={onBack}
-      onFinish={onFinish}
-    />
-  );
-}
-
-// PUBLIC_INTERFACE
-function CharacterMatchStub({ onBack, onFinish }) {
-  return (
-    <GameStubContainer
-      title="Character-Movie Match"
-      desc="Drag and drop characters into their correct Kollywood movies. (Game stub for now!)"
-      color="#02d6d1"
-      onBack={onBack}
-      onFinish={onFinish}
-    />
-  );
-}
-
-// PUBLIC_INTERFACE
-function MovieBingoStub({ onBack, onFinish }) {
-  return (
-    <GameStubContainer
-      title="Movie Bingo"
-      desc="Click all movies matching the given category (e.g., Won National Award). (Game stub for now!)"
-      color="#f76409"
-      onBack={onBack}
-      onFinish={onFinish}
-    />
-  );
-}
-
-// PUBLIC_INTERFACE
-function MovieTimelineStub({ onBack, onFinish }) {
-  return (
-    <GameStubContainer
-      title="Movie Timeline Challenge"
-      desc="Arrange the Kollywood movies in chronological order by release year. (Game stub for now!)"
-      color="#ffb400"
-      onBack={onBack}
-      onFinish={onFinish}
-    />
-  );
-}
-
-// PUBLIC_INTERFACE
-function SpinTheWheelStub({ onBack, onFinish }) {
-  return (
-    <GameStubContainer
-      title="Spin the Wheel"
-      desc="Spin the wheel to pick a combo; guess the matching Kollywood movie. (Game stub for now!)"
-      color="#fb00ff"
-      onBack={onBack}
-      onFinish={onFinish}
-    />
-  );
-}
-
-// PUBLIC_INTERFACE
-function CastComboStub({ onBack, onReverseMode, onFinish }) {
-  return (
-    <GameStubContainer
-      title="Cast Combo"
-      desc="Guess the movie given a combination of 2–3 actors. Bonus: Try Reverse Mode!"
-      color="#8236fa"
-      onBack={onBack}
-      onFinish={onFinish}
-      extra={
-        <button className="btn" style={navBtnStyle("#fb00ff", "#fff")} onClick={onReverseMode}>
-          Switch to Reverse Mode
-        </button>
-      }
-    />
-  );
-}
-
-// PUBLIC_INTERFACE
+// The stubs for ReverseCastCombo and GameStubContainer remain as placeholders.
 function ReverseCastComboStub({ onBack, onFinish }) {
   return (
     <GameStubContainer

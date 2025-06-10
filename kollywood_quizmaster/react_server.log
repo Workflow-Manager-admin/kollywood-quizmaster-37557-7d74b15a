@@ -25,4 +25,32 @@ modules by path ./.ve/ 15 KiB
     ./.ve/EditorOverlay.css 2.25 KiB [built] [code generated]
     ./node_modules/css-loader/dist/cjs.js!./.ve/EditorOverlay.css 1.15 KiB [built] [code generated]
   ./.ve/EditorOverlay.jsx 1.58 KiB [built] [code generated]
-webpack 5.99.9 compiled successfully in 1795 ms
+webpack 5.99.9 compiled successfully in 1739 ms
+assets by status 1.27 KiB [cached] 1 asset
+assets by path *.js 1.47 MiB
+  asset bundle.js 1.39 MiB [emitted] (name: main) 1 related asset
+  asset main.04b25834ad2a551321fd.hot-update.js 83.4 KiB [emitted] [immutable] [hmr] (name: main) 1 related asset
+asset main.04b25834ad2a551321fd.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main 1.47 MiB (1.6 MiB) = bundle.js 1.39 MiB main.04b25834ad2a551321fd.hot-update.js 83.4 KiB 2 auxiliary assets
+cached modules 1.23 MiB [cached] 40 modules
+runtime modules 26.3 KiB 13 modules
+javascript modules 67 KiB
+  ./src/MainContainer.js 23.1 KiB [built] [code generated]
+  ./src/BlurredPosterGuess.js 9.05 KiB [built] [code generated]
+  ./src/CharacterMovieMatch.js 6.34 KiB [built] [code generated]
+  ./src/MovieBingo.js 5.41 KiB [built] [code generated]
+  ./src/MovieTimelineChallenge.js 6.35 KiB [built] [code generated]
+  ./src/SpinTheWheel.js 7.18 KiB [built] [code generated]
+  ./src/CastCombo.js 5.99 KiB [built] [code generated]
+  ./src/TMDBUtils.js 3.62 KiB [built] [code generated]
+webpack 5.99.9 compiled successfully in 495 ms
+assets by status 1.27 KiB [cached] 1 asset
+assets by path *.js 1.41 MiB
+  asset bundle.js 1.38 MiB [emitted] (name: main) 1 related asset
+  asset main.375b5f858ed8aace39cd.hot-update.js 24.8 KiB [emitted] [immutable] [hmr] (name: main) 1 related asset
+asset main.375b5f858ed8aace39cd.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main 1.41 MiB (1.56 MiB) = bundle.js 1.38 MiB main.375b5f858ed8aace39cd.hot-update.js 24.8 KiB 2 auxiliary assets
+cached modules 1.27 MiB [cached] 47 modules
+runtime modules 26.3 KiB 13 modules
+./src/MainContainer.js 20.4 KiB [built] [code generated]
+webpack 5.99.9 compiled successfully in 359 ms
